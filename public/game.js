@@ -143,9 +143,6 @@ if (chickenCenter > visibleRight - 70) {
     behavior: "smooth"
   });
 }
-
-});
-}
   
 function moveChickenForward() {
   if (!demoRunning || !roadGrid || !chicken) return;
