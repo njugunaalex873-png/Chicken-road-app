@@ -138,3 +138,23 @@ function moveChickenForward() {
 }
 
 resetChicken();
+// Connect the GO button to the visual chicken movement
+goButton.addEventListener("click", () => {
+  if (!chicken || roadLanes.length === 0) {
+    message.textContent = "Chicken or road lanes not found.";
+    return;
+  }
+
+  if (chickenStep >= roadLanes.length - 1) {
+    message.textContent = "The chicken has reached the end!";
+    return;
+  }
+
+  chickenStep++;
+
+  // Move the chicken into the next lane
+  roadLanes[chickenStep].appendChild(chicken);
+
+  message.textContent =
+    `Visual preview: chicken moved to lane ${chickenStep + 1}.`;
+});
