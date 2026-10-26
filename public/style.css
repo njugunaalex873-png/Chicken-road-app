@@ -162,6 +162,8 @@ font-size: clamp(45px, 7vw, 75px);
 bottom: 12px;
 opacity: 1;
 filter: drop-shadow(0 4px 5px #0007);
+transform: rotate(-90deg);
+transform-origin: center;
 }
 
 .finish-lane {
