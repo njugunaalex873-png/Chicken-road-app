@@ -70,6 +70,7 @@
     </form>
   </div>
 </section>
+  <div id="gameScreen" hidden>
   <header class="topbar">
     <div class="logo">CHICKEN R<span class="egg">O</span>AD</div><div class="header-right">
   <button class="help-button" id="helpButton">ⓘ How to play?</button>
@@ -238,5 +239,18 @@
         Cross the road carefully. The production game engine must be connected before wagers or payouts can be processed.
       </p>
     </div>
-  </dialog>  <script src="game.js"></script></body>
-      </html>
+</dialog>
+
+<div class="account-bar">
+  Signed in as <strong id="signedInName">Player</strong>
+  <button id="logoutButton" type="button">Sign out</button>
+</div>
+
+</div>
+
+<script src="game.js" defer></script>
+<script type="module" src="firebase.js"></script>
+<script type="module" src="auth.js"></script>
+
+</body>
+</html>
