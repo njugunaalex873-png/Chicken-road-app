@@ -1,5 +1,5 @@
 // ============================================
-// CHICKEN ROAD — CONTINUOUS VISUAL DEMO
+// CHICKEN ROAD — PLAYER-CONTROLLED VISUAL DEMO
 // Demo only: no real wagers or payouts.
 // ============================================
 
@@ -22,9 +22,8 @@ const roadGrid = document.querySelector(".road-grid");
 let step = 0;
 let multiplier = 1.00;
 let demoRunning = false;
-let moveTimer = null;
 
-// Preserve the original starting road, including the 1.00× lane.
+// Save the original road, including the chicken's starting lane.
 const originalRoadContent = roadGrid ? roadGrid.innerHTML : null;
 
 // --------------------------------------------
@@ -37,16 +36,14 @@ function showDialog(title, text) {
   dialogTitle.textContent = title;
   dialogText.textContent = text;
 
-  if (!dialog.open) {
-    dialog.showModal();
-  }
+  if (!dialog.open) dialog.showModal();
 }
 
 document.getElementById("helpButton")?.addEventListener("click", () => {
   showDialog(
     "How to play",
-    "This is a visual demo. Press GO to move forward. " +
-    "No real wagers or payouts are processed."
+    "Press GO to start at 1.00×. Press GO again to move forward one lane. " +
+    "This is a visual demo; no real wagers or payouts are processed."
   );
 });
 
@@ -109,7 +106,7 @@ document.querySelectorAll("[data-level]").forEach(button => {
 });
 
 // --------------------------------------------
-// Update multiplier and demo payout display
+// Multiplier and demo payout display
 // --------------------------------------------
 
 function updateMultiplierDisplay() {
@@ -119,29 +116,47 @@ function updateMultiplierDisplay() {
     "#multiplier, #currentMultiplier, .current-multiplier"
   );
 
-  if (display) {
-    display.textContent = multiplierText;
-  }
+  if (display) display.textContent = multiplierText;
 
-  // Update the newest lane marker.
-  const markers = document.querySelectorAll(
-    ".road-grid .multiplier-marker"
-  );
+  // Update the marker in the chicken's current lane.
+  const currentLane = chicken?.closest(".lane");
+  const currentMarker = currentLane?.querySelector(".multiplier-marker");
 
-  if (markers.length) {
-    markers[markers.length - 1].textContent = multiplierText;
+  if (currentMarker) {
+    currentMarker.textContent = multiplierText;
   }
 
   if (payout) {
     const stake = Number(stakeInput?.value) || 0;
-
     payout.textContent =
       `Demo only: ${(stake * multiplier).toFixed(2)}`;
   }
 }
 
 // --------------------------------------------
-// Create a new lane as the chicken moves forward
+// Put the chicken in a lane and scroll the road
+// --------------------------------------------
+
+function placeChickenInLane(lane) {
+  if (!lane || !chicken || !roadGrid) return;
+
+  lane.appendChild(chicken);
+
+  requestAnimationFrame(() => {
+    const laneCenter = lane.offsetLeft + lane.offsetWidth / 2;
+    const visibleRight = roadGrid.scrollLeft + roadGrid.clientWidth;
+
+    if (laneCenter > visibleRight - 90) {
+      roadGrid.scrollTo({
+        left: Math.max(0, laneCenter - roadGrid.clientWidth + 110),
+        behavior: "smooth"
+      });
+    }
+  });
+}
+
+// --------------------------------------------
+// Create the next lane
 // --------------------------------------------
 
 function createRoadStep() {
@@ -157,132 +172,125 @@ function createRoadStep() {
   lane.appendChild(marker);
   roadGrid.appendChild(lane);
 
-  // Move the chicken into the newest lane.
-  lane.appendChild(chicken);
-
-  // Scroll only when the chicken approaches the right edge.
-  requestAnimationFrame(() => {
-    const chickenCenter =
-      lane.offsetLeft + lane.offsetWidth / 2;
-
-    const visibleRight =
-      roadGrid.scrollLeft + roadGrid.clientWidth;
-
-    if (chickenCenter > visibleRight - 70) {
-      roadGrid.scrollTo({
-        left: chickenCenter - roadGrid.clientWidth + 100,
-        behavior: "smooth"
-      });
-    }
-  });
+  placeChickenInLane(lane);
 }
 
 // --------------------------------------------
-// Move the chicken forward
+// Move one lane only when GO is pressed
 // --------------------------------------------
 
 function moveChickenForward() {
-if (!demoRunning || !roadGrid || !chicken) return;
+  if (!demoRunning || !roadGrid || !chicken) return;
 
-step += 1;
-multiplier = 1 + step * 0.25;
+  step += 1;
+  multiplier = 1 + step * 0.25;
 
-createRoadStep();
-updateMultiplierDisplay();
+  createRoadStep();
+  updateMultiplierDisplay();
 
-if (statusText) {
-statusText.textContent = "DEMO RUNNING";
+  if (statusText) statusText.textContent = "DEMO RUNNING";
+
+  if (message) {
+    message.textContent =
+      `Visual demo: step ${step}, multiplier ${multiplier.toFixed(2)}×. ` +
+      "Press GO to advance again.";
+  }
 }
 
-if (message) {
-message.textContent =
-"Visual demo: step ${step}, multiplier ${multiplier.toFixed(2)}×. Press GO to advance again.";
-}
-}
+// --------------------------------------------
+// Start or advance the demo
+// --------------------------------------------
+
 function startDemo() {
-if (demoRunning) {
-moveChickenForward();
-return;
+  // If already running, GO advances exactly one lane.
+  if (demoRunning) {
+    moveChickenForward();
+    return;
+  }
+
+  const stake = Number(stakeInput?.value);
+
+  if (!Number.isFinite(stake) || stake < 1) {
+    if (message) message.textContent = "Enter a valid demo stake amount.";
+    return;
+  }
+
+  if (!roadGrid || originalRoadContent === null) {
+    if (message) message.textContent = "Road element not found. Check the HTML.";
+    return;
+  }
+
+  // Restore the original starting road.
+  roadGrid.innerHTML = originalRoadContent;
+  roadGrid.scrollLeft = 0;
+
+  // Find the original chicken again.
+  chicken = document.getElementById("chicken");
+
+  if (!chicken) {
+    if (message) {
+      message.textContent = "Chicken element not found in the starting lane.";
+    }
+    return;
+  }
+
+  // Reset the demo to the first lane.
+  step = 0;
+  multiplier = 1.00;
+
+  // Remove any lanes left from a previous run.
+  roadGrid.querySelectorAll(".demo-generated-lane").forEach(lane => {
+    lane.remove();
+  });
+
+  // Find the first lane and put the chicken there.
+  const firstLane = roadGrid.querySelector(".lane");
+
+  if (!firstLane) {
+    if (message) message.textContent = "Starting lane not found in the road.";
+    return;
+  }
+
+  placeChickenInLane(firstLane);
+
+  demoRunning = true;
+
+  if (goButton) {
+    goButton.textContent = "GO";
+    goButton.disabled = false;
+  }
+
+  if (cashoutButton) cashoutButton.disabled = false;
+  if (statusText) statusText.textContent = "DEMO RUNNING";
+
+  if (message) {
+    message.textContent =
+      "Started at 1.00×. Press GO again to move to 1.25×.";
+  }
+
+  updateMultiplierDisplay();
 }
 
-const stake = Number(stakeInput?.value);
+// --------------------------------------------
+// Stop the demo
+// --------------------------------------------
 
-if (!Number.isFinite(stake) || stake < 1) {
-if (message) {
-message.textContent = "Enter a valid demo stake amount.";
-}
-return;
-}
-
-if (!roadGrid || originalRoadContent === null) {
-if (message) {
-message.textContent = "Road element not found. Check the HTML.";
-}
-return;
-}
-
-roadGrid.innerHTML = originalRoadContent;
-chicken = document.getElementById("chicken");
-
-if (!chicken) {
-if (message) {
-message.textContent = "Chicken element not found in the starting lane.";
-}
-return;
-}
-
-step = 0;
-multiplier = 1.00;
-demoRunning = true;
-roadGrid.scrollLeft = 0;
-
-if (goButton) {
-goButton.textContent = "GO";
-goButton.disabled = false;
-}
-
-if (cashoutButton) {
-cashoutButton.disabled = false;
-}
-
-if (statusText) {
-statusText.textContent = "DEMO RUNNING";
-}
-
-if (message) {
-message.textContent =
-"Started at 1.00×. Press GO again to move the chicken forward.";
-}
-
-updateMultiplierDisplay();
-}
 function stopDemo() {
   if (!demoRunning) return;
 
   demoRunning = false;
-
-  if (moveTimer !== null) {
-    clearTimeout(moveTimer);
-    moveTimer = null;
-  }
 
   if (goButton) {
     goButton.disabled = false;
     goButton.textContent = "GO";
   }
 
-  if (cashoutButton) {
-    cashoutButton.disabled = true;
-  }
-
-  if (statusText) {
-    statusText.textContent = "DEMO STOPPED";
-  }
+  if (cashoutButton) cashoutButton.disabled = true;
+  if (statusText) statusText.textContent = "DEMO STOPPED";
 
   if (message) {
     message.textContent =
-      `Demo stopped at ${multiplier.toFixed(2)}×. ` +
-      "No real money was involved.";
+      `Demo stopped at ${multiplier.toFixed(2)}×. No real money was involved.`;
   }
 }
 
@@ -301,19 +309,11 @@ if (balance) {
   balance.textContent = "Demo mode — no real balance";
 }
 
-if (cashoutButton) {
-  cashoutButton.disabled = true;
-}
-
-if (payout) {
-  payout.textContent = "Demo only";
-}
-
-if (statusText) {
-  statusText.textContent = "READY — DEMO MODE";
-}
+if (cashoutButton) cashoutButton.disabled = true;
+if (payout) payout.textContent = "Demo only";
+if (statusText) statusText.textContent = "READY — DEMO MODE";
 
 if (message) {
   message.textContent =
-    "Press GO to test continuous chicken movement. Demo only.";
+    "Press GO to start at 1.00×. Press GO again to move forward.";
     }
