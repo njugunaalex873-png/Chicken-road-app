@@ -1,31 +1,104 @@
-const startButton = document.getElementById("startButton");
+const goButton = document.getElementById("goButton");
 const cashoutButton = document.getElementById("cashoutButton");
+const stakeInput = document.getElementById("stake");
 const message = document.getElementById("message");
-const accountButton = document.getElementById("accountButton");
+const statusText = document.getElementById("status");
+const balance = document.getElementById("balance");
+const payout = document.getElementById("payout");
+const chicken = document.getElementById("chicken");
 
-accountButton.addEventListener("click", () => {
-message.textContent =
-"Secure account registration will be added in the next stage.";
+const dialog = document.getElementById("infoDialog");
+const dialogTitle = document.getElementById("dialogTitle");
+const dialogText = document.getElementById("dialogText");
+
+document.getElementById("helpButton").addEventListener("click", () => {
+dialogTitle.textContent = "How to play";
+dialogText.textContent =
+"Choose a stake and difficulty, then use GO to begin. The production game engine must determine the outcome on the server. Real-money play is not connected yet.";
+dialog.showModal();
 });
 
-startButton.addEventListener("click", async () => {
-message.textContent =
-"The game interface is ready. The secure game engine must be connected before gameplay can begin.";
+document.getElementById("menuButton").addEventListener("click", () => {
+dialogTitle.textContent = "Chicken Road menu";
+dialogText.textContent =
+"Account registration, wallet history, and settings will be connected through the secure backend in a later stage.";
+dialog.showModal();
+});
 
-startButton.disabled = true;
+document.getElementById("closeDialog").addEventListener("click", () => {
+dialog.close();
+});
+
+document.querySelectorAll("[data-stake]").forEach(button => {
+button.addEventListener("click", () => {
+stakeInput.value = button.dataset.stake;
+});
+});
+
+document.getElementById("minusButton").addEventListener("click", () => {
+const current = Number(stakeInput.value) || 1;
+stakeInput.value = Math.max(1, current - 10);
+});
+
+document.getElementById("plusButton").addEventListener("click", () => {
+const current = Number(stakeInput.value) || 0;
+stakeInput.value = current + 10;
+});
+
+document.querySelectorAll("[data-level]").forEach(button => {
+button.addEventListener("click", () => {
+document.querySelectorAll("[data-level]").forEach(item => {
+item.classList.remove("selected");
+});
+
+button.classList.add("selected");
+message.textContent =
+  "Selected " + button.dataset.level +
+  " difficulty. Server-side game rules are not connected yet.";
+
+});
+});
+
+goButton.addEventListener("click", async () => {
+const stake = Number(stakeInput.value);
+
+if (!Number.isFinite(stake) || stake < 1) {
+message.textContent = "Enter a valid stake amount.";
+return;
+}
+
+statusText.textContent = "CHECKING SERVER";
+message.textContent = "Checking the Chicken Road backend...";
 
 try {
 const response = await fetch("/api/health");
+if (!response.ok) throw new Error("Server unavailable");
 
-if (response.ok) {
+const result = await response.json();
+
+if (result.success) {
+  statusText.textContent = "SETUP REQUIRED";
   message.textContent =
-    "Backend connected. The game engine still needs to be configured.";
+    "Backend is online. The secure game engine and wallet are not configured, so no wager has been placed.";
+} else {
+  throw new Error("Backend is not ready");
 }
 
 } catch (error) {
+statusText.textContent = "NOT CONNECTED";
 message.textContent =
-"Backend not connected yet. We will configure the server next.";
+"Could not reach the backend. Check the server deployment and try again.";
 }
-});
 
 cashoutButton.disabled = true;
+payout.textContent = "Not available";
+});
+
+cashoutButton.addEventListener("click", () => {
+message.textContent =
+"Cash-out is unavailable until the server-authoritative game engine and financial ledger are implemented.";
+});
+
+balance.textContent = "Account not connected";
+cashoutButton.disabled = true;
+payout.textContent = "Not available";
