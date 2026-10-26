@@ -11,17 +11,86 @@ const statusText = document.getElementById("status");
 const balance = document.getElementById("balance");
 const payout = document.getElementById("payout");
 
+const roadGrid = document.querySelector(".road-grid");
 let chicken = document.getElementById("chicken");
 
 const dialog = document.getElementById("infoDialog");
 const dialogTitle = document.getElementById("dialogTitle");
 const dialogText = document.getElementById("dialogText");
 
-const roadGrid = document.querySelector(".road-grid");
-
 let step = 0;
 let multiplier = 1.00;
 let demoRunning = false;
+
+// --------------------------------------------
+// Helpers
+// --------------------------------------------
+
+function formatMultiplier(value) {
+  return `${value.toFixed(2)}×`;
+}
+
+function multiplierForLane(index) {
+  return 1 + index * 0.25;
+}
+
+function getLanes() {
+  return roadGrid
+    ? Array.from(roadGrid.querySelectorAll(".lane"))
+    : [];
+}
+
+function labelAllLanes() {
+  getLanes().forEach((lane, index) => {
+    let marker = lane.querySelector(".multiplier-marker");
+
+    if (!marker) {
+      marker = document.createElement("div");
+      marker.className = "multiplier-marker";
+      lane.prepend(marker);
+    }
+
+    marker.textContent = formatMultiplier(multiplierForLane(index));
+    marker.classList.remove("green", "gold");
+  });
+}
+
+function updateMultiplierDisplay() {
+  const display = document.querySelector(
+    "#multiplier, #currentMultiplier, .current-multiplier"
+  );
+
+  if (display) {
+    display.textContent = formatMultiplier(multiplier);
+  }
+
+  if (payout) {
+    const stake = Number(stakeInput?.value) || 0;
+    payout.textContent =
+      `Demo only: ${(stake * multiplier).toFixed(2)}`;
+  }
+}
+
+function scrollToLane(lane) {
+  if (!roadGrid || !lane) return;
+
+  requestAnimationFrame(() => {
+    const gridRect = roadGrid.getBoundingClientRect();
+    const laneRect = lane.getBoundingClientRect();
+
+    const target =
+      roadGrid.scrollLeft +
+      laneRect.left -
+      gridRect.left +
+      laneRect.width / 2 -
+      gridRect.width / 2;
+
+    roadGrid.scrollTo({
+      left: Math.max(0, target),
+      behavior: "smooth"
+    });
+  });
+}
 
 // --------------------------------------------
 // Dialogs
@@ -39,8 +108,8 @@ function showDialog(title, text) {
 document.getElementById("helpButton")?.addEventListener("click", () => {
   showDialog(
     "How to play",
-    "The chicken starts at 1.00×. Press GO to start, then press GO again " +
-    "to advance one lane. This is a visual demo only."
+    "The chicken starts at 1.00×. Press GO once to start, then press GO " +
+    "again to advance one lane. Cash Out stops the visual demo."
   );
 });
 
@@ -61,9 +130,10 @@ document.getElementById("closeDialog")?.addEventListener("click", () => {
 
 document.querySelectorAll("[data-stake]").forEach(button => {
   button.addEventListener("click", () => {
-    if (!demoRunning && stakeInput) {
-      stakeInput.value = button.dataset.stake;
-    }
+    if (demoRunning || !stakeInput) return;
+
+    stakeInput.value = button.dataset.stake;
+    updateMultiplierDisplay();
   });
 });
 
@@ -72,6 +142,7 @@ document.getElementById("minusButton")?.addEventListener("click", () => {
 
   const current = Number(stakeInput.value) || 1;
   stakeInput.value = Math.max(1, current - 10);
+  updateMultiplierDisplay();
 });
 
 document.getElementById("plusButton")?.addEventListener("click", () => {
@@ -79,6 +150,7 @@ document.getElementById("plusButton")?.addEventListener("click", () => {
 
   const current = Number(stakeInput.value) || 0;
   stakeInput.value = current + 10;
+  updateMultiplierDisplay();
 });
 
 // --------------------------------------------
@@ -103,92 +175,102 @@ document.querySelectorAll("[data-level]").forEach(button => {
 });
 
 // --------------------------------------------
-// Multiplier display
+// Create a lane when the road ends
 // --------------------------------------------
 
-function updateMultiplierDisplay() {
-  const text = `${multiplier.toFixed(2)}×`;
-
-  const display = document.querySelector(
-    "#multiplier, #currentMultiplier, .current-multiplier"
-  );
-
-  if (display) display.textContent = text;
-
-  // Update only the lane where the chicken currently stands.
-  const currentLane = chicken?.closest(".lane");
-  const currentMarker = currentLane?.querySelector(".multiplier-marker");
-
-  if (currentMarker) currentMarker.textContent = text;
-
-  if (payout) {
-    const stake = Number(stakeInput?.value) || 0;
-    payout.textContent = `Demo only: ${(stake * multiplier).toFixed(2)}`;
-  }
-}
-
-// --------------------------------------------
-// Create a lane
-// --------------------------------------------
-
-function createRoadStep() {
-  if (!roadGrid || !chicken) return;
+function createRoadLane() {
+  if (!roadGrid) return null;
 
   const lane = document.createElement("div");
   lane.className = "lane demo-generated-lane";
 
-  const marker = document.createElement("div");
-  marker.className = "multiplier-marker";
-  marker.textContent = `${multiplier.toFixed(2)}×`;
+  const existingLane = getLanes()[0];
 
-  lane.appendChild(marker);
+  if (existingLane) {
+    const style = getComputedStyle(existingLane);
+
+    lane.style.width = style.width || "110px";
+    lane.style.minWidth = style.minWidth || "110px";
+    lane.style.minHeight = style.minHeight || "430px";
+  }
+
   roadGrid.appendChild(lane);
-
-  // Move the chicken into the new lane.
-  lane.appendChild(chicken);
-
-  // Scroll the road when the new lane approaches the right edge.
-  requestAnimationFrame(() => {
-    const laneCenter = lane.offsetLeft + lane.offsetWidth / 2;
-    const desiredScroll = Math.max(
-      0,
-      laneCenter - roadGrid.clientWidth / 2
-    );
-
-    roadGrid.scrollTo({
-      left: desiredScroll,
-      behavior: "smooth"
-    });
-  });
+  return lane;
 }
 
 // --------------------------------------------
-// Advance exactly one lane per GO press
+// Position chicken in the requested lane
+// --------------------------------------------
+
+function positionChickenInLane(index) {
+  if (!roadGrid || !chicken) return;
+
+  let lanes = getLanes();
+
+  while (index >= lanes.length) {
+    if (!createRoadLane()) return;
+    lanes = getLanes();
+  }
+
+  const lane = lanes[index];
+  if (!lane) return;
+
+  lane.appendChild(chicken);
+  labelAllLanes();
+  scrollToLane(lane);
+}
+
+// --------------------------------------------
+// Move forward exactly one lane
 // --------------------------------------------
 
 function moveChickenForward() {
-  if (!demoRunning || !roadGrid || !chicken) return;
+  if (!demoRunning) return;
 
   step += 1;
-  multiplier = 1 + step * 0.25;
+  multiplier = multiplierForLane(step);
 
-  createRoadStep();
+  positionChickenInLane(step);
   updateMultiplierDisplay();
 
   if (statusText) statusText.textContent = "DEMO RUNNING";
 
   if (message) {
     message.textContent =
-      `Step ${step}: ${multiplier.toFixed(2)}×. Press GO to advance again.`;
+      `Step ${step}: ${formatMultiplier(multiplier)}. Press GO to advance again.`;
   }
 }
 
 // --------------------------------------------
-// Start or advance the demo
+// Reset the road
+// --------------------------------------------
+
+function resetDemoRoad() {
+  if (!roadGrid || !chicken) return false;
+
+  roadGrid.querySelectorAll(".demo-generated-lane").forEach(lane => {
+    lane.remove();
+  });
+
+  const firstLane = roadGrid.querySelector(".lane");
+  if (!firstLane) return false;
+
+  step = 0;
+  multiplier = 1.00;
+  roadGrid.scrollLeft = 0;
+
+  firstLane.appendChild(chicken);
+  labelAllLanes();
+  updateMultiplierDisplay();
+
+  return true;
+}
+
+// --------------------------------------------
+// Start or advance
 // --------------------------------------------
 
 function startDemo() {
-  // Once started, each GO press advances one lane.
   if (demoRunning) {
     moveChickenForward();
     return;
@@ -201,57 +283,24 @@ function startDemo() {
     return;
   }
 
-  if (!roadGrid || !chicken) {
-    if (message) message.textContent = "Road or chicken element not found.";
+  if (!resetDemoRoad()) {
+    if (message) message.textContent = "Could not find the road or chicken.";
     return;
   }
-
-  // Remove generated lanes and restore the original six lanes.
-  roadGrid.querySelectorAll(".demo-generated-lane").forEach(lane => {
-    lane.remove();
-  });
-
-  // Reset to the first lane.
-  step = 0;
-  multiplier = 1.00;
-  roadGrid.scrollLeft = 0;
-
-  // Ensure the chicken starts in the actual first lane.
-  const firstLane = roadGrid.querySelector(".lane");
-
-  if (!firstLane) {
-    if (message) message.textContent = "Starting lane not found.";
-    return;
-  }
-
-  firstLane.appendChild(chicken);
-
-  // Set the original lane labels into the 0.25× sequence.
-  roadGrid.querySelectorAll(".lane").forEach((lane, index) => {
-    const marker = lane.querySelector(".multiplier-marker");
-
-    if (marker) {
-      marker.textContent = `${(1 + index * 0.25).toFixed(2)}×`;
-      marker.classList.remove("green", "gold");
-    }
-  });
 
   demoRunning = true;
 
-  if (goButton) goButton.textContent = "GO";
   if (cashoutButton) cashoutButton.disabled = false;
   if (statusText) statusText.textContent = "DEMO RUNNING";
 
   if (message) {
     message.textContent =
-      "Started at 1.00×. Press GO again to move to 1.25×.";
+      "Demo started at 1.00×. Press GO again to move to 1.25×.";
   }
-
-  updateMultiplierDisplay();
 }
 
 // --------------------------------------------
-// Stop the demo
+// Cash Out
 // --------------------------------------------
 
 function stopDemo() {
@@ -264,7 +313,7 @@ function stopDemo() {
 
   if (message) {
     message.textContent =
-      `Demo stopped at ${multiplier.toFixed(2)}×. No real money was involved.`;
+      `Demo stopped at ${formatMultiplier(multiplier)}. No real money was involved.`;
   }
 }
 
@@ -276,46 +325,33 @@ goButton?.addEventListener("click", startDemo);
 cashoutButton?.addEventListener("click", stopDemo);
 
 // --------------------------------------------
-// Initial screen
+// Initialize when the page loads
 // --------------------------------------------
 
-function positionChickenAtStart() {
-  if (!roadGrid) return;
-
-  const firstLane = roadGrid.querySelector(".lane");
-
-  if (firstLane && chicken) {
-    firstLane.appendChild(chicken);
+function initializeGame() {
+  if (!roadGrid || !chicken) {
+    if (message) {
+      message.textContent = "Could not find the road or chicken element.";
+    }
+    return;
   }
 
-  // Make every original lane follow the same sequence.
-  roadGrid.querySelectorAll(".lane").forEach((lane, index) => {
-    const marker = lane.querySelector(".multiplier-marker");
+  demoRunning = false;
+  resetDemoRoad();
 
-    if (marker) {
-      marker.textContent = `${(1 + index * 0.25).toFixed(2)}×`;
-      marker.classList.remove("green", "gold");
-    }
-  });
+  if (balance) {
+    balance.textContent = "Demo mode — no real balance";
+  }
 
-  step = 0;
-  multiplier = 1.00;
-  roadGrid.scrollLeft = 0;
+  if (cashoutButton) cashoutButton.disabled = true;
+  if (goButton) goButton.textContent = "GO";
+  if (statusText) statusText.textContent = "READY — DEMO MODE";
+  if (payout) payout.textContent = "Demo only";
 
-  updateMultiplierDisplay();
+  if (message) {
+    message.textContent =
+      "Chicken starts at 1.00×. Press GO to start, then GO again to advance.";
+  }
 }
 
-positionChickenAtStart();
-
-if (balance) {
-  balance.textContent = "Demo mode — no real balance";
-}
-
-if (cashoutButton) cashoutButton.disabled = true;
-if (payout) payout.textContent = "Demo only";
-if (statusText) statusText.textContent = "READY — DEMO MODE";
-
-if (message) {
-  message.textContent =
-    "Chicken starts at 1.00×. Press GO to start, then GO again to advance.";
-                                                         }
+initializeGame();
