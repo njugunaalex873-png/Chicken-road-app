@@ -5,7 +5,7 @@ const message = document.getElementById("message");
 const statusText = document.getElementById("status");
 const balance = document.getElementById("balance");
 const payout = document.getElementById("payout");
-const chicken = document.getElementById("chicken");
+let chicken = document.getElementById("chicken");
 
 const dialog = document.getElementById("infoDialog");
 const dialogTitle = document.getElementById("dialogTitle");
@@ -157,34 +157,50 @@ function moveChickenForward() {
 }
 
 function startDemo() {
-  if (demoRunning) return;
+if (demoRunning) return;
 
-  const stake = Number(stakeInput?.value);
+const stake = Number(stakeInput?.value);
 
-  if (!Number.isFinite(stake) || stake < 1) {
-    message.textContent = "Enter a valid demo stake amount.";
-    return;
-  }
+if (!Number.isFinite(stake) || stake < 1) {
+message.textContent = "Enter a valid demo stake amount.";
+return;
+}
 
-  if (!roadGrid || !chicken) {
-    message.textContent = "Road or chicken element not found. Check the HTML.";
-    return;
-  }
+if (!roadGrid || !chicken) {
+message.textContent = "Road or chicken element not found. Check the HTML.";
+return;
+}
 
-  demoRunning = true;
-  step = 0;
-  multiplier = 1.00;
+// Reset the road to its original six lanes.
+if (originalRoadContent !== null) {
+roadGrid.innerHTML = originalRoadContent;
+}
 
-  goButton.textContent = "RUNNING";
-  goButton.disabled = true;
-  cashoutButton.disabled = false;
+// Find the chicken and lanes again after restoring the HTML.
+chicken = document.getElementById("chicken");
 
-  statusText.textContent = "DEMO RUNNING";
-  message.textContent =
-    "Visual demo started. No real wager has been placed.";
+if (!chicken) {
+  message.textContent = "Chicken element not found after resetting the road.";
+  return;
+}
 
-  updateMultiplierDisplay();
-  moveChickenForward();
+step = 0;
+multiplier = 1.00;
+demoRunning = true;
+
+goButton.textContent = "RUNNING";
+goButton.disabled = true;
+cashoutButton.disabled = false;
+
+roadGrid.scrollLeft = 0;
+
+statusText.textContent = "DEMO RUNNING";
+message.textContent =
+"Visual demo started. No real wager has been placed.";
+
+updateMultiplierDisplay();
+
+moveChickenForward();
 }
 
 function stopDemo() {
