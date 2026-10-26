@@ -158,11 +158,17 @@ margin-top: 0;
 }
 
 .road-grid .lane .chicken-position {
-position: absolute;
-top: 145px;
-bottom: auto;
-left: 50%;
-transform: translateX(-50%);
+  position: absolute;
+  top: 145px;
+  bottom: auto;
+  left: 50%;
+  transform: translateX(-50%);
+  width: clamp(55px, 7vw, 85px);
+  height: clamp(75px, 10vw, 115px);
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 @media (max-width: 700px) {
