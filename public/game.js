@@ -110,21 +110,19 @@ document.querySelectorAll("[data-level]").forEach(button => {
 // --------------------------------------------
 
 function updateMultiplierDisplay() {
+function updateMultiplierDisplay() {
   const multiplierText = `${multiplier.toFixed(2)}×`;
 
   const display = document.querySelector(
     "#multiplier, #currentMultiplier, .current-multiplier"
   );
 
-  if (display) display.textContent = multiplierText;
-
-  // Update the marker in the chicken's current lane.
-  const currentLane = chicken?.closest(".lane");
-  const currentMarker = currentLane?.querySelector(".multiplier-marker");
-
-  if (currentMarker) {
-    currentMarker.textContent = multiplierText;
+  if (display) {
+    display.textContent = multiplierText;
   }
+
+  // Do not change the multiplier markers of existing lanes.
+  // Each lane keeps its own multiplier label.
 
   if (payout) {
     const stake = Number(stakeInput?.value) || 0;
