@@ -1,0 +1,39 @@
+<!DOCTYPE html><html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#101a25">
+  <title>Chicken Road</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="topbar">
+    <h2>🐔 CHICKEN ROAD</h2>
+    <button id="accountButton">Account</button>
+  </header>  <main class="container">
+    <h1>Ready to cross?</h1>
+    <p>Guide your chicken across the road!</p><section class="game-card">
+  <p>CURRENT MULTIPLIER</p>
+  <h2 id="multiplier">1.00×</h2>
+
+  <div id="road" class="road">
+    <div class="lane">🌱 🚗 🌱 🚙 🌱</div>
+    <div class="lane">🚕 🌱 🚚 🌱 🚗</div>
+    <div class="lane">🌱 🚙 🌱 🚕 🌱</div>
+    <div id="chicken">🐔</div>
+  </div>
+
+  <p id="message">
+    Welcome to Chicken Road!
+  </p>
+
+  <button id="startButton">Start Game</button>
+  <button id="cashoutButton" disabled>Cash Out</button>
+
+  <p class="notice">
+    Game setup stage. Real-money transactions are not enabled yet.
+  </p>
+</section>
+
+  </main>  <script src="game.js"></script></body>
+</html>
