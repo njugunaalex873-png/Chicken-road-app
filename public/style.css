@@ -2,83 +2,463 @@
   box-sizing: border-box;
   }
 
-body {
-margin: 0;
-background: #0b121b;
-color: white;
-font-family: Arial, sans-serif;
-text-align: center;
+:root {
+--background: #111326;
+--panel: #20243d;
+--road: #343958;
+--yellow: #ffd52f;
+--green: #20dc66;
+--text: #f5f6ff;
+--muted: #a8aec9;
 }
 
-.topbar {
-background: #14212d;
-padding: 15px;
-display: flex;
-justify-content: space-around;
-align-items: center;
+body {
+margin: 0;
+background: var(--background);
+color: var(--text);
+font-family: Arial, Helvetica, sans-serif;
+min-height: 100vh;
+}
+
+button,
+input {
+font: inherit;
 }
 
 button {
-border: none;
-border-radius: 10px;
-padding: 13px 18px;
-margin: 5px;
-font-weight: bold;
 cursor: pointer;
 }
 
-#startButton {
-background: #f8c84a;
-color: #111;
+.topbar {
+min-height: 66px;
+padding: 12px 20px;
+display: flex;
+align-items: center;
+justify-content: space-between;
+gap: 12px;
+background: #191b35;
+border-bottom: 1px solid #343855;
 }
 
-#cashoutButton {
-background: #16c784;
-color: #111;
+.logo {
+font-weight: 1000;
+font-size: clamp(17px, 3vw, 27px);
+letter-spacing: -1px;
+white-space: nowrap;
+}
+
+.egg {
+color: var(--yellow);
+text-shadow: 0 0 12px #ffd52f55;
+}
+
+.header-right {
+display: flex;
+align-items: center;
+gap: 10px;
+}
+
+.help-button,
+.icon-button {
+color: var(--text);
+background: #282c49;
+border: 1px solid #424765;
+border-radius: 8px;
+padding: 10px;
+font-size: 12px;
+}
+
+.balance {
+display: flex;
+align-items: center;
+gap: 8px;
+background: #282c49;
+border: 1px solid #424765;
+padding: 10px;
+border-radius: 8px;
+font-size: 11px;
+}
+
+.coin {
+color: var(--yellow);
+}
+
+main {
+width: 100%;
+max-width: 1200px;
+margin: auto;
+padding: 18px;
+}
+
+.game-board {
+position: relative;
+overflow: hidden;
+background: #303550;
+border: 1px solid #424865;
+border-radius: 12px 12px 0 0;
+}
+
+.road-grid {
+display: grid;
+grid-template-columns: repeat(6, minmax(0, 1fr));
+min-height: 430px;
+background:
+radial-gradient(ellipse at center, #3a405f 0%, #303550 75%);
+}
+
+.lane {
+min-width: 0;
+position: relative;
+display: flex;
+flex-direction: column;
+align-items: center;
+border-right: 3px dashed #9ca4c3;
+}
+
+.lane:last-child {
+border-right: none;
+}
+
+.multiplier-marker {
+position: relative;
+z-index: 2;
+margin-top: 135px;
+width: min(90%, 125px);
+aspect-ratio: 1;
+border-radius: 50%;
+display: flex;
+align-items: center;
+justify-content: center;
+background: linear-gradient(145deg, #555b80, #353a60);
+border: 5px solid #747baf;
+box-shadow: inset 0 0 12px #161a37, 0 5px 15px #0005;
+font-size: clamp(12px, 1.7vw, 19px);
+font-weight: 900;
+letter-spacing: -0.5px;
+white-space: nowrap;
+}
+
+.multiplier-marker.green {
+background: linear-gradient(145deg, #31ec78, #079d48);
+border-color: #5cff95;
+color: #fff;
+}
+
+.multiplier-marker.gold {
+background: linear-gradient(145deg, #ffe76b, #f6b800);
+border-color: #ffdc48;
+color: #27202b;
+}
+
+.road-object {
+position: absolute;
+bottom: 20px;
+font-size: clamp(25px, 4vw, 42px);
+opacity: 0.85;
+}
+
+.chicken-position {
+font-size: clamp(45px, 7vw, 75px);
+bottom: 12px;
+opacity: 1;
+filter: drop-shadow(0 4px 5px #0007);
+}
+
+.finish-lane {
+background: linear-gradient(#ffffff03, #ffd52f15);
+}
+
+.golden-egg {
+position: absolute;
+bottom: 20px;
+font-size: clamp(48px, 7vw, 78px);
+filter: drop-shadow(0 0 15px #ffd52f66);
+}
+
+.road-bottom {
+height: 26px;
+background: linear-gradient(#252941, #171a30);
+border-top: 5px solid #525a7b;
+box-shadow: 0 8px 15px #0005;
+}
+
+.control-panel {
+display: grid;
+grid-template-columns: 1fr 1.25fr 1.15fr;
+gap: 16px;
+align-items: center;
+padding: 20px;
+background: #272b46;
+border: 1px solid #414763;
+border-radius: 0 0 14px 14px;
+}
+
+.control-panel label {
+display: block;
+color: var(--muted);
+font-size: 11px;
+font-weight: 800;
+letter-spacing: 1px;
+margin-bottom: 10px;
+}
+
+.stake-input {
+display: flex;
+align-items: center;
+border: 1px solid #454b6b;
+border-radius: 8px;
+background: #1b1e35;
+overflow: hidden;
+}
+
+.stake-input button {
+width: 38px;
+height: 42px;
+border: 0;
+background: transparent;
+color: white;
+font-size: 20px;
+}
+
+.stake-input input {
+width: 100%;
+min-width: 0;
+color: white;
+background: transparent;
+border: 0;
+outline: none;
+text-align: center;
+font-weight: 800;
+}
+
+.quick-bets {
+display: grid;
+grid-template-columns: repeat(4, 1fr);
+gap: 5px;
+margin-top: 8px;
+}
+
+.quick-bets button {
+padding: 9px 3px;
+color: #e6e8f7;
+background: #1b1e35;
+border: 1px solid #414763;
+border-radius: 6px;
+font-size: 11px;
+}
+
+.difficulty-options {
+display: grid;
+grid-template-columns: repeat(4, 1fr);
+gap: 4px;
+}
+
+.difficulty-options button {
+padding: 10px 3px;
+border-radius: 6px;
+background: #1c2037;
+border: 1px solid #414763;
+color: #aeb5d0;
+font-size: 10px;
+}
+
+.difficulty-options button.selected {
+background: #414766;
+color: white;
+border-color: #7d85b2;
+}
+
+.collision {
+color: var(--muted);
+font-size: 10px;
+margin: 12px 0 0;
+}
+
+.action-section {
+display: grid;
+grid-template-columns: 1fr 1fr;
+gap: 10px;
+}
+
+.cashout-button,
+.go-button {
+min-height: 84px;
+border: 0;
+border-radius: 12px;
+font-weight: 1000;
+font-size: 15px;
+box-shadow: 0 4px 0 #0003;
+}
+
+.cashout-button {
+background: var(--yellow);
+color: #28202a;
+}
+
+.cashout-button span {
+display: block;
+font-size: 11px;
+margin-top: 7px;
+}
+
+.go-button {
+background: var(--green);
+color: #fff;
+font-size: 23px;
 }
 
 button:disabled {
 opacity: 0.45;
+cursor: not-allowed;
 }
 
-.container {
-max-width: 600px;
-margin: auto;
-padding: 20px;
-}
-
-.game-card {
-background: #14212d;
-padding: 20px;
-border-radius: 18px;
-}
-
-#multiplier {
-color: #f8c84a;
-font-size: 38px;
-}
-
-.road {
-background: #263640;
+.bottom-info {
+display: flex;
+align-items: center;
+gap: 12px;
+margin-top: 16px;
 padding: 15px;
+background: #1b1e35;
+border-radius: 10px;
+border: 1px solid #343855;
+}
+
+.info-icon {
+font-size: 28px;
+}
+
+#status {
+font-size: 11px;
+font-weight: 900;
+color: var(--yellow);
+}
+
+.bottom-info p {
+color: var(--muted);
+font-size: 12px;
+line-height: 1.5;
+margin: 0;
+}
+
+.history-panel {
+margin-top: 15px;
+padding: 15px;
+background: #1b1e35;
+border-radius: 10px;
+}
+
+.history-panel h3 {
+font-size: 11px;
+letter-spacing: 1px;
+color: var(--muted);
+}
+
+.history-items {
+display: flex;
+gap: 10px;
+}
+
+.history-items span {
+background: #303550;
+border-radius: 7px;
+padding: 8px 13px;
+color: #b5bbd4;
+}
+
+dialog {
+max-width: 340px;
+width: calc(100% - 32px);
+color: white;
+background: #272b46;
+border: 1px solid #555c7b;
 border-radius: 12px;
-margin: 20px 0;
+}
+
+dialog::backdrop {
+background: #000b;
+}
+
+.dialog-content {
+padding: 15px;
+}
+
+.close-button {
+float: right;
+border: 0;
+background: transparent;
+color: white;
+font-size: 20px;
+}
+
+@media (max-width: 700px) {
+.topbar {
+padding: 12px;
+flex-wrap: wrap;
+}
+
+.header-right {
+gap: 5px;
+}
+
+.help-button {
+display: none;
+}
+
+.balance {
+max-width: 155px;
+overflow-wrap: anywhere;
+}
+
+main {
+padding: 10px;
+}
+
+.road-grid {
+min-height: 330px;
+}
+
+.multiplier-marker {
+margin-top: 100px;
+border-width: 3px;
+font-size: 11px;
+}
+
+.control-panel {
+grid-template-columns: 1fr;
+padding: 14px;
+gap: 20px;
+}
+
+.difficulty-options button {
+font-size: 12px;
+}
+
+.cashout-button,
+.go-button {
+min-height: 72px;
+}
+}
+
+@media (max-width: 380px) {
+.logo {
+font-size: 16px;
+}
+
+.balance {
+font-size: 9px;
+max-width: 125px;
+}
+
+.road-grid {
+min-height: 285px;
+}
+
+.multiplier-marker {
+margin-top: 88px;
+font-size: 9px;
 }
 
 .lane {
-padding: 15px 0;
-border-bottom: 1px dashed #81919e;
-font-size: 25px;
-letter-spacing: 5px;
+border-right-width: 2px;
 }
-
-#chicken {
-font-size: 35px;
-margin-top: 10px;
-}
-
-.notice {
-color: #aab8c4;
-font-size: 12px;
-line-height: 1.5;
-}
+  }
