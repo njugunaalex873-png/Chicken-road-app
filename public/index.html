@@ -2,38 +2,120 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#101a25">
+  <meta name="theme-color" content="#11152b">
   <title>Chicken Road</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <header class="topbar">
-    <h2>🐔 CHICKEN ROAD</h2>
-    <button id="accountButton">Account</button>
-  </header>  <main class="container">
-    <h1>Ready to cross?</h1>
-    <p>Guide your chicken across the road!</p><section class="game-card">
-  <p>CURRENT MULTIPLIER</p>
-  <h2 id="multiplier">1.00×</h2>
+    <div class="logo">CHICKEN R<span class="egg">O</span>AD</div><div class="header-right">
+  <button class="help-button" id="helpButton">ⓘ How to play?</button>
+  <div class="balance">
+    <span id="balance">Account not connected</span>
+    <span class="coin">●</span>
+  </div>
+  <button class="icon-button" id="menuButton" aria-label="Menu">☰</button>
+</div>
 
-  <div id="road" class="road">
-    <div class="lane">🌱 🚗 🌱 🚙 🌱</div>
-    <div class="lane">🚕 🌱 🚚 🌱 🚗</div>
-    <div class="lane">🌱 🚙 🌱 🚕 🌱</div>
-    <div id="chicken">🐔</div>
+  </header>  <main>
+    <section class="game-board">
+      <div class="road-grid">
+        <div class="lane">
+          <div class="multiplier-marker">1.20×</div>
+          <div class="road-object">🚧</div>
+        </div>
+        <div class="lane">
+          <div class="multiplier-marker green">1.50×</div>
+          <div class="road-object chicken-position" id="chicken">🐔</div>
+        </div>
+        <div class="lane">
+          <div class="multiplier-marker">2.00×</div>
+          <div class="road-object">🚧</div>
+        </div>
+        <div class="lane">
+          <div class="multiplier-marker">3.00×</div>
+          <div class="road-object">🚧</div>
+        </div>
+        <div class="lane">
+          <div class="multiplier-marker">5.00×</div>
+          <div class="road-object">🚧</div>
+        </div>
+        <div class="lane finish-lane">
+          <div class="multiplier-marker gold">10.00×</div>
+          <div class="golden-egg">🥚</div>
+        </div>
+      </div>  <div class="road-bottom"></div>
+</section>
+
+<section class="control-panel">
+  <div class="stake-section">
+    <label for="stake">BET AMOUNT</label>
+
+    <div class="stake-input">
+      <button id="minusButton" aria-label="Decrease stake">−</button>
+      <input id="stake" type="number" min="1" step="1" value="50">
+      <button id="plusButton" aria-label="Increase stake">+</button>
+    </div>
+
+    <div class="quick-bets">
+      <button data-stake="10">10</button>
+      <button data-stake="50">50</button>
+      <button data-stake="100">100</button>
+      <button data-stake="500">500</button>
+    </div>
   </div>
 
+  <div class="difficulty-section">
+    <label>DIFFICULTY</label>
+    <div class="difficulty-options">
+      <button data-level="Easy">Easy</button>
+      <button data-level="Medium" class="selected">Medium</button>
+      <button data-level="Hard">Hard</button>
+      <button data-level="Hardcore">Hardcore</button>
+    </div>
+    <p class="collision">⚠ Collision risk depends on game rules.</p>
+  </div>
+
+  <div class="action-section">
+    <button id="cashoutButton" class="cashout-button" disabled>
+      CASH OUT
+      <span id="payout">Not available</span>
+    </button>
+
+    <button id="goButton" class="go-button">
+      GO
+    </button>
+  </div>
+</section>
+
+<section class="bottom-info">
+  <div>
+    <span class="info-icon">🐔</span>
+    <span id="status">READY TO PLAY</span>
+  </div>
   <p id="message">
-    Welcome to Chicken Road!
-  </p>
-
-  <button id="startButton">Start Game</button>
-  <button id="cashoutButton" disabled>Cash Out</button>
-
-  <p class="notice">
-    Game setup stage. Real-money transactions are not enabled yet.
+    Game server and account wallet must be connected before real-money play.
   </p>
 </section>
 
-  </main>  <script src="game.js"></script></body>
-</html>
+<section class="history-panel">
+  <h3>RECENT ROUNDS</h3>
+  <div class="history-items">
+    <span>—</span>
+    <span>—</span>
+    <span>—</span>
+    <span>—</span>
+    <span>—</span>
+  </div>
+</section>
+
+  </main>  <dialog id="infoDialog">
+    <div class="dialog-content">
+      <button id="closeDialog" class="close-button">✕</button>
+      <h2 id="dialogTitle">Chicken Road</h2>
+      <p id="dialogText">
+        Cross the road carefully. The production game engine must be connected before wagers or payouts can be processed.
+      </p>
+    </div>
+  </dialog>  <script src="game.js"></script></body>
+      </html>
