@@ -102,3 +102,39 @@ message.textContent =
 balance.textContent = "Account not connected";
 cashoutButton.disabled = true;
 payout.textContent = "Not available";
+// Chicken movement preview
+let chickenStep = 0;
+
+const chickenElement = document.getElementById("chicken");
+const roadLanes = document.querySelectorAll(".lane");
+
+function resetChicken() {
+  chickenStep = 0;
+
+  if (chickenElement) {
+    chickenElement.style.left = "50%";
+    chickenElement.style.bottom = "12px";
+  }
+}
+
+function moveChickenForward() {
+  if (!chickenElement || roadLanes.length === 0) return;
+
+  if (chickenStep >= roadLanes.length - 1) {
+    message.textContent =
+      "The chicken reached the end of the visual preview!";
+    return;
+  }
+
+  chickenStep++;
+
+  const laneHeight = roadLanes[0].getBoundingClientRect().height;
+
+  chickenElement.style.bottom =
+    `${12 + chickenStep * laneHeight}px`;
+
+  message.textContent =
+    `Visual preview: chicken advanced to lane ${chickenStep + 1}.`;
+}
+
+resetChicken();
