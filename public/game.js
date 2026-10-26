@@ -200,73 +200,62 @@ message.textContent =
 }
 }
 function startDemo() {
-  if (demoRunning) return;
-
-  const stake = Number(stakeInput?.value);
-
-  if (!Number.isFinite(stake) || stake < 1) {
-    if (message) {
-      message.textContent = "Enter a valid demo stake amount.";
-    }
-    return;
-  }
-
-  if (!roadGrid || originalRoadContent === null) {
-    if (message) {
-      message.textContent = "Road element not found. Check the HTML.";
-    }
-    return;
-  }
-
-  // Restore the original road and its fixed starting lane.
-  roadGrid.innerHTML = originalRoadContent;
-
-  // The chicken element must be retrieved again after restoration.
-  chicken = document.getElementById("chicken");
-
-  if (!chicken) {
-    if (message) {
-      message.textContent =
-        "Chicken element not found in the starting lane.";
-    }
-    return;
-  }
-
-  step = 0;
-  multiplier = 1.00;
-  demoRunning = true;
-
-  // Begin at the leftmost position.
-  roadGrid.scrollLeft = 0;
-
-  if (goButton) {
-    goButton.textContent = "RUNNING";
-    goButton.disabled = true;
-  }
-
-  if (cashoutButton) {
-    cashoutButton.disabled = false;
-  }
-
-  if (statusText) {
-    statusText.textContent = "DEMO RUNNING";
-  }
-
-  if (message) {
-    message.textContent =
-      "Visual demo started at 1.00×. No real wager has been placed.";
-  }
-
-  updateMultiplierDisplay();
-
-  // Keep the chicken at 1.00× briefly before its first move.
-  moveTimer = window.setTimeout(moveChickenForward, 1200);
+if (demoRunning) {
+moveChickenForward();
+return;
 }
 
-// --------------------------------------------
-// Stop the visual demo
-// --------------------------------------------
+const stake = Number(stakeInput?.value);
 
+if (!Number.isFinite(stake) || stake < 1) {
+if (message) {
+message.textContent = "Enter a valid demo stake amount.";
+}
+return;
+}
+
+if (!roadGrid || originalRoadContent === null) {
+if (message) {
+message.textContent = "Road element not found. Check the HTML.";
+}
+return;
+}
+
+roadGrid.innerHTML = originalRoadContent;
+chicken = document.getElementById("chicken");
+
+if (!chicken) {
+if (message) {
+message.textContent = "Chicken element not found in the starting lane.";
+}
+return;
+}
+
+step = 0;
+multiplier = 1.00;
+demoRunning = true;
+roadGrid.scrollLeft = 0;
+
+if (goButton) {
+goButton.textContent = "GO";
+goButton.disabled = false;
+}
+
+if (cashoutButton) {
+cashoutButton.disabled = false;
+}
+
+if (statusText) {
+statusText.textContent = "DEMO RUNNING";
+}
+
+if (message) {
+message.textContent =
+"Started at 1.00×. Press GO again to move the chicken forward.";
+}
+
+updateMultiplierDisplay();
+}
 function stopDemo() {
   if (!demoRunning) return;
 
