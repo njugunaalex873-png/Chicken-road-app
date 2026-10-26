@@ -11,150 +11,221 @@ const dialog = document.getElementById("infoDialog");
 const dialogTitle = document.getElementById("dialogTitle");
 const dialogText = document.getElementById("dialogText");
 
-document.getElementById("helpButton").addEventListener("click", () => {
-dialogTitle.textContent = "How to play";
-dialogText.textContent =
-"Choose a stake and difficulty, then use GO to begin. The production game engine must determine the outcome on the server. Real-money play is not connected yet.";
-dialog.showModal();
+const roadGrid = document.querySelector(".road-grid");
+const lanes = [...document.querySelectorAll(".road-grid .lane")];
+
+let step = 0;
+let multiplier = 1.00;
+let demoRunning = false;
+let moveTimer = null;
+let originalRoadContent = null;
+
+function showDialog(title, text) {
+  if (!dialog || !dialogTitle || !dialogText) return;
+
+  dialogTitle.textContent = title;
+  dialogText.textContent = text;
+
+  if (!dialog.open) dialog.showModal();
+}
+
+document.getElementById("helpButton")?.addEventListener("click", () => {
+  showDialog(
+    "How to play",
+    "This is a visual demo. Press GO to move forward and increase the displayed multiplier. No real wagers or payouts are processed."
+  );
 });
 
-document.getElementById("menuButton").addEventListener("click", () => {
-dialogTitle.textContent = "Chicken Road menu";
-dialogText.textContent =
-"Account registration, wallet history, and settings will be connected through the secure backend in a later stage.";
-dialog.showModal();
+document.getElementById("menuButton")?.addEventListener("click", () => {
+  showDialog(
+    "Chicken Road menu",
+    "Account registration, wallet history, and settings are not connected yet."
+  );
 });
 
-document.getElementById("closeDialog").addEventListener("click", () => {
-dialog.close();
+document.getElementById("closeDialog")?.addEventListener("click", () => {
+  dialog?.close();
 });
 
 document.querySelectorAll("[data-stake]").forEach(button => {
-button.addEventListener("click", () => {
-stakeInput.value = button.dataset.stake;
-});
-});
-
-document.getElementById("minusButton").addEventListener("click", () => {
-const current = Number(stakeInput.value) || 1;
-stakeInput.value = Math.max(1, current - 10);
+  button.addEventListener("click", () => {
+    if (!demoRunning && stakeInput) {
+      stakeInput.value = button.dataset.stake;
+    }
+  });
 });
 
-document.getElementById("plusButton").addEventListener("click", () => {
-const current = Number(stakeInput.value) || 0;
-stakeInput.value = current + 10;
+document.getElementById("minusButton")?.addEventListener("click", () => {
+  if (demoRunning || !stakeInput) return;
+
+  const current = Number(stakeInput.value) || 1;
+  stakeInput.value = Math.max(1, current - 10);
+});
+
+document.getElementById("plusButton")?.addEventListener("click", () => {
+  if (demoRunning || !stakeInput) return;
+
+  const current = Number(stakeInput.value) || 0;
+  stakeInput.value = current + 10;
 });
 
 document.querySelectorAll("[data-level]").forEach(button => {
-button.addEventListener("click", () => {
-document.querySelectorAll("[data-level]").forEach(item => {
-item.classList.remove("selected");
+  button.addEventListener("click", () => {
+    if (demoRunning) return;
+
+    document.querySelectorAll("[data-level]").forEach(item => {
+      item.classList.remove("selected");
+    });
+
+    button.classList.add("selected");
+    message.textContent =
+      `Selected ${button.dataset.level} difficulty for the visual demo.`;
+  });
 });
 
-button.classList.add("selected");
-message.textContent =
-  "Selected " + button.dataset.level +
-  " difficulty. Server-side game rules are not connected yet.";
-
-});
-});
-
-goButton.addEventListener("click", async () => {
-const stake = Number(stakeInput.value);
-
-if (!Number.isFinite(stake) || stake < 1) {
-message.textContent = "Enter a valid stake amount.";
-return;
+// Save the initial road markup so it can be restored on reset.
+if (roadGrid) {
+  originalRoadContent = roadGrid.innerHTML;
 }
 
-statusText.textContent = "CHECKING SERVER";
-message.textContent = "Checking the Chicken Road backend...";
+function updateMultiplierDisplay() {
+  const multiplierText = `${multiplier.toFixed(2)}×`;
 
-try {
-const response = await fetch("/api/health");
-if (!response.ok) throw new Error("Server unavailable");
+  // Update any existing multiplier display without requiring a specific ID.
+  const display = document.querySelector(
+    "#multiplier, #currentMultiplier, .current-multiplier"
+  );
 
-const result = await response.json();
-
-if (result.success) {
-  statusText.textContent = "SETUP REQUIRED";
-  message.textContent =
-    "Backend is online. The secure game engine and wallet are not configured, so no wager has been placed.";
-} else {
-  throw new Error("Backend is not ready");
-}
-
-} catch (error) {
-statusText.textContent = "NOT CONNECTED";
-message.textContent =
-"Could not reach the backend. Check the server deployment and try again.";
-}
-
-cashoutButton.disabled = true;
-payout.textContent = "Not available";
-});
-
-cashoutButton.addEventListener("click", () => {
-message.textContent =
-"Cash-out is unavailable until the server-authoritative game engine and financial ledger are implemented.";
-});
-
-balance.textContent = "Account not connected";
-cashoutButton.disabled = true;
-payout.textContent = "Not available";
-// Chicken movement preview
-let chickenStep = 0;
-
-const chickenElement = document.getElementById("chicken");
-const roadLanes = document.querySelectorAll(".lane");
-
-function resetChicken() {
-  chickenStep = 0;
-
-  if (chickenElement) {
-    chickenElement.style.left = "50%";
-    chickenElement.style.bottom = "12px";
+  if (display) {
+    display.textContent = multiplierText;
   }
+
+  // Update the most recently displayed lane marker.
+  const markers = document.querySelectorAll(".multiplier-marker");
+  if (markers.length) {
+    const marker = markers[markers.length - 1];
+    marker.textContent = multiplierText;
+  }
+
+  if (payout) {
+    const stake = Number(stakeInput?.value) || 0;
+    payout.textContent =
+      `Demo only: ${(stake * multiplier).toFixed(2)}`;
+  }
+}
+
+function createRoadStep() {
+  if (!roadGrid || !chicken) return;
+
+  const lane = document.createElement("div");
+  lane.className = "lane demo-generated-lane";
+
+  const marker = document.createElement("div");
+  marker.className = "multiplier-marker";
+  marker.textContent = `${multiplier.toFixed(2)}×`;
+
+  lane.appendChild(marker);
+  roadGrid.appendChild(lane);
+
+  // Keep the chicken inside the newest lane.
+  lane.appendChild(chicken);
+
+  // Scroll the road horizontally as new steps appear.
+  roadGrid.scrollTo({
+    left: roadGrid.scrollWidth,
+    behavior: "smooth"
+  });
 }
 
 function moveChickenForward() {
-  if (!chickenElement || roadLanes.length === 0) return;
+  if (!demoRunning || !roadGrid || !chicken) return;
 
-  if (chickenStep >= roadLanes.length - 1) {
-    message.textContent =
-      "The chicken reached the end of the visual preview!";
-    return;
-  }
+  step += 1;
 
-  chickenStep++;
+  // Demo-only progression. This is not a real game outcome.
+  multiplier = 1 + step * 0.25;
 
-  const laneHeight = roadLanes[0].getBoundingClientRect().height;
+  createRoadStep();
+  updateMultiplierDisplay();
 
-  chickenElement.style.bottom =
-    `${12 + chickenStep * laneHeight}px`;
-
+  statusText.textContent = "DEMO RUNNING";
   message.textContent =
-    `Visual preview: chicken advanced to lane ${chickenStep + 1}.`;
+    `Visual demo: step ${step}, multiplier ${multiplier.toFixed(2)}×.`;
+
+  // The preview continues until the player stops it.
+  moveTimer = window.setTimeout(moveChickenForward, 1200);
 }
 
-resetChicken();
-// Connect the GO button to the visual chicken movement
-goButton.addEventListener("click", () => {
-  if (!chicken || roadLanes.length === 0) {
-    message.textContent = "Chicken or road lanes not found.";
+function startDemo() {
+  if (demoRunning) return;
+
+  const stake = Number(stakeInput?.value);
+
+  if (!Number.isFinite(stake) || stake < 1) {
+    message.textContent = "Enter a valid demo stake amount.";
     return;
   }
 
-  if (chickenStep >= roadLanes.length - 1) {
-    message.textContent = "The chicken has reached the end!";
+  if (!roadGrid || !chicken) {
+    message.textContent = "Road or chicken element not found. Check the HTML.";
     return;
   }
 
-  chickenStep++;
+  demoRunning = true;
+  step = 0;
+  multiplier = 1.00;
 
-  // Move the chicken into the next lane
-  roadLanes[chickenStep].appendChild(chicken);
+  goButton.textContent = "RUNNING";
+  goButton.disabled = true;
+  cashoutButton.disabled = false;
 
+  statusText.textContent = "DEMO RUNNING";
   message.textContent =
-    `Visual preview: chicken moved to lane ${chickenStep + 1}.`;
-});
+    "Visual demo started. No real wager has been placed.";
+
+  updateMultiplierDisplay();
+  moveChickenForward();
+}
+
+function stopDemo() {
+  if (!demoRunning) return;
+
+  demoRunning = false;
+
+  if (moveTimer !== null) {
+    clearTimeout(moveTimer);
+    moveTimer = null;
+  }
+
+  goButton.disabled = false;
+  goButton.textContent = "GO";
+  cashoutButton.disabled = true;
+
+  statusText.textContent = "DEMO STOPPED";
+  message.textContent =
+    `Demo stopped at ${multiplier.toFixed(2)}×. No money was paid or collected.`;
+}
+
+goButton?.addEventListener("click", startDemo);
+cashoutButton?.addEventListener("click", stopDemo);
+
+if (balance) {
+  balance.textContent = "Demo mode — no real balance";
+}
+
+if (cashoutButton) {
+  cashoutButton.disabled = true;
+}
+
+if (payout) {
+  payout.textContent = "Demo only";
+}
+
+if (statusText) {
+  statusText.textContent = "READY — DEMO MODE";
+}
+
+if (message) {
+  message.textContent =
+    "Press GO to test continuous chicken movement. Demo only.";
+}
