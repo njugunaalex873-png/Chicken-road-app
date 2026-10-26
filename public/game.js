@@ -302,12 +302,14 @@ goButton?.addEventListener("click", startDemo);
 cashoutButton?.addEventListener("click", stopDemo);
 
 // --------------------------------------------
-// Initial screen — chicken starts at 1.00×
+// Initial screen — start at 1.00× immediately
 // --------------------------------------------
 
-if (roadGrid && originalRoadContent !== null) {
-  roadGrid.innerHTML = originalRoadContent;
+function positionChickenAtStart() {
+  if (!roadGrid) return;
+
   roadGrid.scrollLeft = 0;
+
   chicken = document.getElementById("chicken");
 
   const firstLane = roadGrid.querySelector(".lane");
@@ -315,11 +317,14 @@ if (roadGrid && originalRoadContent !== null) {
   if (firstLane && chicken) {
     firstLane.appendChild(chicken);
   }
+
+  step = 0;
+  multiplier = 1.00;
+
+  updateMultiplierDisplay();
 }
 
-step = 0;
-multiplier = 1.00;
-demoRunning = false;
+positionChickenAtStart();
 
 if (balance) {
   balance.textContent = "Demo mode — no real balance";
@@ -333,5 +338,3 @@ if (message) {
   message.textContent =
     "Chicken starts at 1.00×. Press GO to move forward.";
 }
-
-updateMultiplierDisplay();
