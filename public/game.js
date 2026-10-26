@@ -182,33 +182,23 @@ function createRoadStep() {
 // --------------------------------------------
 
 function moveChickenForward() {
-  if (!demoRunning || !roadGrid || !chicken) return;
+if (!demoRunning || !roadGrid || !chicken) return;
 
-  step += 1;
+step += 1;
+multiplier = 1 + step * 0.25;
 
-  // Visual demonstration progression only.
-  multiplier = 1 + step * 0.25;
+createRoadStep();
+updateMultiplierDisplay();
 
-  createRoadStep();
-  updateMultiplierDisplay();
-
-  if (statusText) {
-    statusText.textContent = "DEMO RUNNING";
-  }
-
-  if (message) {
-    message.textContent =
-      `Visual demo: step ${step}, multiplier ${multiplier.toFixed(2)}×.`;
-  }
-
-  // Continue until the user stops the demo.
-  moveTimer = window.setTimeout(moveChickenForward, 1200);
+if (statusText) {
+statusText.textContent = "DEMO RUNNING";
 }
 
-// --------------------------------------------
-// Start a new demo round
-// --------------------------------------------
-
+if (message) {
+message.textContent =
+"Visual demo: step ${step}, multiplier ${multiplier.toFixed(2)}×. Press GO to advance again.";
+}
+}
 function startDemo() {
   if (demoRunning) return;
 
