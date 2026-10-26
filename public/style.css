@@ -115,8 +115,65 @@ align-items: center;
 border-right: 3px dashed #9ca4c3;
 }
 
-.lane:last-child {
-border-right: none;
+.road-grid {
+display: flex;
+flex-direction: row;
+flex-wrap: nowrap;
+overflow-x: auto;
+overflow-y: hidden;
+width: 100%;
+min-height: 430px;
+scroll-behavior: smooth;
+scrollbar-width: none;
+-webkit-overflow-scrolling: touch;
+}
+
+.road-grid::-webkit-scrollbar {
+display: none;
+}
+
+.road-grid .lane {
+position: relative;
+flex: 0 0 110px;
+width: 110px;
+min-width: 110px;
+min-height: 430px;
+box-sizing: border-box;
+display: block;
+border-right: 3px dashed #9ca4c3;
+}
+
+.road-grid .lane.demo-generated-lane {
+flex: 0 0 110px;
+width: 110px;
+min-width: 110px;
+}
+
+.road-grid .lane .multiplier-marker {
+position: absolute;
+top: 30px;
+left: 50%;
+transform: translateX(-50%);
+margin-top: 0;
+}
+
+.road-grid .lane .chicken-position {
+position: absolute;
+top: 145px;
+bottom: auto;
+left: 50%;
+transform: translateX(-50%);
+}
+
+@media (max-width: 700px) {
+.road-grid,
+.road-grid .lane {
+min-height: 330px;
+}
+
+.road-grid .lane .chicken-position {
+top: 145px;
+}
 }
 
 .multiplier-marker {
