@@ -539,3 +539,183 @@ font-size: 9px;
 border-right-width: 2px;
 }
   }
+/* ===== PROFESSIONAL CHICKEN ROAD AUTHENTICATION ===== */
+
+.auth-screen[hidden],
+.auth-screen form[hidden] {
+  display: none !important;
+}
+
+.auth-screen {
+  min-height: 100vh;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 28px 18px;
+  background:
+    radial-gradient(ellipse at top, #203a51 0%, transparent 55%),
+    #0b1220;
+  color: #f8fafc;
+  font-family: Arial, sans-serif;
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 390px;
+  box-sizing: border-box;
+  padding: 28px 23px;
+  border: 1px solid #293b50;
+  border-radius: 24px;
+  background: linear-gradient(160deg, #17263a, #101a2b);
+  box-shadow: 0 20px 55px rgba(0, 0, 0, 0.4);
+}
+
+.auth-card h1 {
+  margin: 0 0 12px;
+  text-align: center;
+  font-size: 31px;
+  font-weight: 800;
+  letter-spacing: -1px;
+  color: #ffffff;
+}
+
+.auth-card > p:not(#authMessage) {
+  margin: 0 0 25px;
+  text-align: center;
+  color: #aebdd0;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+#authMessage {
+  margin: 12px 0;
+  color: #facc15;
+  font-size: 14px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.auth-card form h2 {
+  margin: 20px 0 22px;
+  font-size: 23px;
+  color: #ffffff;
+}
+
+.auth-card label {
+  display: block;
+  margin: 15px 0 8px;
+  color: #d9e4f1;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.auth-card input {
+  display: block;
+  width: 100%;
+  min-height: 49px;
+  box-sizing: border-box;
+  padding: 13px 14px;
+  border: 1px solid #40536a;
+  border-radius: 11px;
+  outline: none;
+  background: #0c1626;
+  color: #ffffff;
+  font-family: Arial, sans-serif;
+  font-size: 16px;
+}
+
+.auth-card input:focus {
+  border-color: #22d3a1;
+  box-shadow: 0 0 0 3px rgba(34, 211, 161, 0.15);
+}
+
+.auth-card button {
+  min-height: 46px;
+  padding: 11px 15px;
+  border: 0;
+  border-radius: 11px;
+  font-family: Arial, sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+#loginButton,
+#registerButton {
+  display: block;
+  width: 100%;
+  margin-top: 23px;
+  background: linear-gradient(135deg, #22d3a1, #0da878);
+  color: #06251c;
+  box-shadow: 0 6px 18px rgba(13, 168, 120, 0.2);
+}
+
+#loginButton:active,
+#registerButton:active {
+  transform: scale(0.98);
+}
+
+#forgotPassword {
+  display: block;
+  width: 100%;
+  margin-top: 12px;
+  background: transparent;
+  color: #72e8c5;
+}
+
+.auth-card form p {
+  margin: 22px 0 0;
+  text-align: center;
+  color: #b8c6d7;
+  font-size: 14px;
+}
+
+#showRegister,
+#showLogin {
+  min-height: auto;
+  padding: 5px;
+  background: transparent;
+  color: #55e4b9;
+  font-size: 14px;
+}
+
+.auth-card button:focus-visible {
+  outline: 2px solid #facc15;
+  outline-offset: 3px;
+}
+
+/* Signed-in account controls */
+.account-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 14px;
+  color: #dbe7f5;
+  font-family: Arial, sans-serif;
+}
+
+#logoutButton {
+  padding: 9px 15px;
+  border: 1px solid #40536a;
+  border-radius: 9px;
+  background: #17263a;
+  color: #ffffff;
+}
+
+/* Small Android screens */
+@media (max-width: 360px) {
+  .auth-screen {
+    padding: 18px 12px;
+  }
+
+  .auth-card {
+    padding: 23px 17px;
+  }
+
+  .auth-card h1 {
+    font-size: 27px;
+  }
+}
