@@ -115,28 +115,38 @@ function updateMultiplierDisplay() {
 }
 
 function createRoadStep() {
-  if (!roadGrid || !chicken) return;
+if (!roadGrid || !chicken) return;
 
-  const lane = document.createElement("div");
-  lane.className = "lane demo-generated-lane";
+const lane = document.createElement("div");
+lane.className = "lane demo-generated-lane";
 
-  const marker = document.createElement("div");
-  marker.className = "multiplier-marker";
-  marker.textContent = `${multiplier.toFixed(2)}×`;
+const marker = document.createElement("div");
+marker.className = "multiplier-marker";
+marker.textContent = "${multiplier.toFixed(2)}×";
 
-  lane.appendChild(marker);
-  roadGrid.appendChild(lane);
+lane.appendChild(marker);
+roadGrid.appendChild(lane);
 
-  // Keep the chicken inside the newest lane.
-  lane.appendChild(chicken);
+// Move the chicken into the newest lane.
+lane.appendChild(chicken);
 
-  // Scroll the road horizontally as new steps appear.
+// Keep the starting position fixed and scroll only as needed.
+requestAnimationFrame(() => {
+const chickenCenter =
+lane.offsetLeft + lane.offsetWidth / 2;
+
+const visibleRight = roadGrid.scrollLeft + roadGrid.clientWidth;
+
+if (chickenCenter > visibleRight - 70) {
   roadGrid.scrollTo({
-    left: roadGrid.scrollWidth,
+    left: chickenCenter - roadGrid.clientWidth + 100,
     behavior: "smooth"
   });
 }
 
+});
+}
+  
 function moveChickenForward() {
   if (!demoRunning || !roadGrid || !chicken) return;
 
