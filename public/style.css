@@ -1,0 +1,84 @@
+* {
+  box-sizing: border-box;
+  }
+
+body {
+margin: 0;
+background: #0b121b;
+color: white;
+font-family: Arial, sans-serif;
+text-align: center;
+}
+
+.topbar {
+background: #14212d;
+padding: 15px;
+display: flex;
+justify-content: space-around;
+align-items: center;
+}
+
+button {
+border: none;
+border-radius: 10px;
+padding: 13px 18px;
+margin: 5px;
+font-weight: bold;
+cursor: pointer;
+}
+
+#startButton {
+background: #f8c84a;
+color: #111;
+}
+
+#cashoutButton {
+background: #16c784;
+color: #111;
+}
+
+button:disabled {
+opacity: 0.45;
+}
+
+.container {
+max-width: 600px;
+margin: auto;
+padding: 20px;
+}
+
+.game-card {
+background: #14212d;
+padding: 20px;
+border-radius: 18px;
+}
+
+#multiplier {
+color: #f8c84a;
+font-size: 38px;
+}
+
+.road {
+background: #263640;
+padding: 15px;
+border-radius: 12px;
+margin: 20px 0;
+}
+
+.lane {
+padding: 15px 0;
+border-bottom: 1px dashed #81919e;
+font-size: 25px;
+letter-spacing: 5px;
+}
+
+#chicken {
+font-size: 35px;
+margin-top: 10px;
+}
+
+.notice {
+color: #aab8c4;
+font-size: 12px;
+line-height: 1.5;
+}
