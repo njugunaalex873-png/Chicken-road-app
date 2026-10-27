@@ -3,6 +3,44 @@ const helmet = require("helmet");
 const path = require("path");
 const crypto = require("crypto");
 const admin = require("firebase-admin");
+const axios = require("axios");
+
+async function getMpesaAccessToken() {
+const key = process.env.MPESA_CONSUMER_KEY;
+const secret = process.env.MPESA_CONSUMER_SECRET;
+
+if (!key || !secret) {
+throw new Error("M-Pesa sandbox credentials are missing.");
+}
+
+const credentials = Buffer.from("${key}:${secret}").toString("base64");
+
+const response = await axios.get(
+"https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials",
+{
+headers: {
+Authorization: "Basic ${credentials}"
+},
+timeout: 15000
+}
+);
+
+return response.data.access_token;
+}
+
+function getMpesaTimestamp() {
+const date = new Date();
+const parts = [
+date.getFullYear(),
+String(date.getMonth() + 1).padStart(2, "0"),
+String(date.getDate()).padStart(2, "0"),
+String(date.getHours()).padStart(2, "0"),
+String(date.getMinutes()).padStart(2, "0"),
+String(date.getSeconds()).padStart(2, "0")
+];
+
+return parts.join("");
+       }
 
 const app = express();
 const PORT = process.env.PORT || 3000;
