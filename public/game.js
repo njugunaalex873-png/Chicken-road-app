@@ -17,7 +17,8 @@ let chicken = document.getElementById("chicken");
 const dialog = document.getElementById("infoDialog");
 const dialogTitle = document.getElementById("dialogTitle");
 const dialogText = document.getElementById("dialogText");
-
+const modeSelector = document.getElementById("modeSelector");
+const gameArea = document.getElementById("gameArea");
 
 let step = 0;
 let multiplier = 1.00;
@@ -511,6 +512,8 @@ function selectGameMode(mode) {
       message.textContent =
         "Press GO when you are ready to play.";
     }
+    if (modeSelector) modeSelector.hidden = true;
+   if (gameArea) gameArea.hidden = false;
 
     if (goButton) goButton.disabled = false;
     if (stakeInput) stakeInput.disabled = false;
