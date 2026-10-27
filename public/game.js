@@ -285,6 +285,7 @@ function resetDemoRoad() {
 
 
 async function startDemo() {
+  if (selectedGameMode !== "demo") return;
   if (demoRunning || roundRequestInProgress) return;
 
   const stake = Number(stakeInput?.value);
@@ -457,3 +458,93 @@ function initializeGame() {
 }
 
 initializeGame();
+
+/* Chicken Road mode selection */
+let selectedGameMode = null;
+
+const demoModeButton =
+  document.getElementById("demoModeButton");
+
+const realModeButton =
+  document.getElementById("realModeButton");
+
+const modeMessage =
+  document.getElementById("modeMessage");
+
+function selectGameMode(mode) {
+  selectedGameMode = mode;
+
+  demoModeButton?.classList.toggle(
+    "selected",
+    mode === "demo"
+  );
+
+  realModeButton?.classList.toggle(
+    "selected",
+    mode === "real"
+  );
+
+  if (mode === null) {
+    if (modeMessage) {
+      modeMessage.textContent =
+        "Choose Demo Mode to start playing.";
+    }
+
+    if (goButton) goButton.disabled = true;
+    if (cashoutButton) cashoutButton.disabled = true;
+    if (stakeInput) stakeInput.disabled = true;
+    return;
+  }
+
+  if (mode === "demo") {
+    if (modeMessage) {
+      modeMessage.textContent =
+        "Demo Mode selected. Virtual stakes only.";
+    }
+
+    if (message) {
+      message.textContent =
+        "Demo Mode selected. Press GO to start.";
+    }
+
+    if (goButton) goButton.disabled = false;
+    if (stakeInput) stakeInput.disabled = false;
+    return;
+  }
+
+  if (mode === "real") {
+    if (modeMessage) {
+      modeMessage.textContent =
+        "Real Money Mode is not available yet. " +
+        "Deposits, betting and withdrawals are disabled.";
+    }
+
+    if (message) {
+      message.textContent =
+        "Please choose Demo Mode to play.";
+    }
+
+    if (goButton) goButton.disabled = true;
+    if (cashoutButton) cashoutButton.disabled = true;
+    if (stakeInput) stakeInput.disabled = true;
+  }
+}
+
+demoModeButton?.addEventListener("click", () => {
+  selectGameMode("demo");
+});
+
+realModeButton?.addEventListener("click", () => {
+  if (demoRunning) {
+    if (modeMessage) {
+      modeMessage.textContent =
+        "Finish your current demo round first.";
+    }
+    return;
+  }
+
+  selectGameMode("real");
+});
+
+selectGameMode(null);
+
