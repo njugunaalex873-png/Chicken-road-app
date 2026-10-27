@@ -18,9 +18,17 @@ const dialog = document.getElementById("infoDialog");
 const dialogTitle = document.getElementById("dialogTitle");
 const dialogText = document.getElementById("dialogText");
 
+
 let step = 0;
 let multiplier = 1.00;
 let demoRunning = false;
+
+const SERVER_URL = "https://chicken-road-server.onrender.com";
+let serverRoundId = null;
+let roundTimer = null;
+let roundRequestInProgress = false;
+const ROUND_UPDATE_INTERVAL = 1000;
+
 
 // --------------------------------------------
 // Helpers
@@ -224,22 +232,27 @@ function positionChickenInLane(index) {
 // Move forward exactly one lane
 // --------------------------------------------
 
-function moveChickenForward() {
+
+function moveChickenForward(serverMultiplier) {
   if (!demoRunning) return;
 
-  step += 1;
-  multiplier = multiplierForLane(step);
+  const nextStep = Math.round((serverMultiplier - 1) / 0.25);
 
-  positionChickenInLane(step);
-  updateMultiplierDisplay();
+  if (nextStep > step) {
+    step = nextStep;
+    multiplier = serverMultiplier;
+    positionChickenInLane(step);
+    updateMultiplierDisplay();
+  }
 
   if (statusText) statusText.textContent = "DEMO RUNNING";
 
   if (message) {
     message.textContent =
-      `Step ${step}: ${formatMultiplier(multiplier)}. Press GO to advance again.`;
+      `Server multiplier: ${formatMultiplier(multiplier)}.`;
   }
 }
+
 
 // --------------------------------------------
 // Reset the road
@@ -270,11 +283,9 @@ function resetDemoRoad() {
 // Start or advance
 // --------------------------------------------
 
-function startDemo() {
-  if (demoRunning) {
-    moveChickenForward();
-    return;
-  }
+
+async function startDemo() {
+  if (demoRunning || roundRequestInProgress) return;
 
   const stake = Number(stakeInput?.value);
 
@@ -288,34 +299,125 @@ function startDemo() {
     return;
   }
 
-  demoRunning = true;
+  roundRequestInProgress = true;
+  if (goButton) goButton.disabled = true;
 
-  if (cashoutButton) cashoutButton.disabled = false;
-  if (statusText) statusText.textContent = "DEMO RUNNING";
+  try {
+    const response = await fetch(`${SERVER_URL}/api/round/start`, {
+      method: "POST"
+    });
 
-  if (message) {
-    message.textContent =
-      "Demo started at 1.00×. Press GO again to move to 1.25×.";
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || "Could not start the demo round.");
+    }
+
+    serverRoundId = data.round.id;
+    multiplier = data.round.multiplier;
+    demoRunning = true;
+
+    if (cashoutButton) cashoutButton.disabled = false;
+    if (statusText) statusText.textContent = "DEMO RUNNING";
+    if (message) message.textContent = "Demo round started at 1.00×.";
+
+    roundTimer = setInterval(advanceServerRound, ROUND_UPDATE_INTERVAL);
+  } catch (error) {
+    if (message) message.textContent = error.message;
+  } finally {
+    roundRequestInProgress = false;
+    if (goButton) goButton.disabled = false;
   }
 }
+
+async function advanceServerRound() {
+  if (!demoRunning || roundRequestInProgress) return;
+
+  roundRequestInProgress = true;
+
+  try {
+    const response = await fetch(`${SERVER_URL}/api/round/advance`, {
+      method: "POST"
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || "Could not update the round.");
+    }
+
+    if (data.round) {
+      moveChickenForward(data.round.multiplier);
+    }
+
+    if (data.crashed) {
+      demoRunning = false;
+      clearInterval(roundTimer);
+      roundTimer = null;
+
+      if (cashoutButton) cashoutButton.disabled = true;
+      if (goButton) goButton.disabled = false;
+      if (statusText) statusText.textContent = "CRASHED";
+
+      if (message) {
+        message.textContent =
+          `Round crashed at ${formatMultiplier(data.round.crashPoint)}.`;
+      }
+    }
+  } catch (error) {
+    if (message) message.textContent = error.message;
+    clearInterval(roundTimer);
+    roundTimer = null;
+    demoRunning = false;
+    if (cashoutButton) cashoutButton.disabled = true;
+    if (goButton) goButton.disabled = false;
+    if (statusText) statusText.textContent = "CONNECTION ERROR";
+  } finally {
+    roundRequestInProgress = false;
+  }
+  }
+
 
 // --------------------------------------------
 // Cash Out
 // --------------------------------------------
 
-function stopDemo() {
-  if (!demoRunning) return;
 
-  demoRunning = false;
+async function stopDemo() {
+  if (!demoRunning || roundRequestInProgress) return;
 
-  if (cashoutButton) cashoutButton.disabled = true;
-  if (statusText) statusText.textContent = "DEMO STOPPED";
+  roundRequestInProgress = true;
 
-  if (message) {
-    message.textContent =
-      `Demo stopped at ${formatMultiplier(multiplier)}. No real money was involved.`;
+  try {
+    const response = await fetch(`${SERVER_URL}/api/round/cashout`, {
+      method: "POST"
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || "Could not cash out of the demo round.");
+    }
+
+    demoRunning = false;
+    clearInterval(roundTimer);
+    roundTimer = null;
+
+    if (cashoutButton) cashoutButton.disabled = true;
+    if (goButton) goButton.disabled = false;
+    if (statusText) statusText.textContent = "DEMO STOPPED";
+
+    if (message) {
+      message.textContent =
+        `Demo stopped at ${formatMultiplier(multiplier)}. No real money was involved.`;
+    }
+  } catch (error) {
+    if (message) message.textContent = error.message;
+  } finally {
+    roundRequestInProgress = false;
   }
 }
+
 
 // --------------------------------------------
 // Button events
