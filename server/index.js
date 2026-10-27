@@ -256,6 +256,63 @@ demoMode: true,
 history: history.get(req.user.uid) || []
 });
 });
+// M-Pesa callback endpoint.
+// This acknowledges the callback but does NOT credit any wallet yet.
+// Payment verification and secure, persistent wallet accounting
+// must be implemented before accepting real deposits.
+app.post("/api/mpesa/callback", (req, res) => {
+  try {
+    const callback = req.body?.Body?.stkCallback;
+
+    if (!callback) {
+      console.warn("Received an invalid M-Pesa callback.");
+      return res.status(400).json({
+        success: false,
+        message: "Invalid callback payload."
+      });
+    }
+
+    const checkoutRequestId = callback.CheckoutRequestID;
+    const resultCode = callback.ResultCode;
+
+    console.log("M-Pesa callback received:", {
+      checkoutRequestId,
+      resultCode,
+      resultDescription: callback.ResultDesc
+    });
+
+    if (resultCode === 0) {
+      const items =
+        callback.CallbackMetadata?.Item || [];
+
+      const getItem = (name) =>
+        items.find((item) => item.Name === name)?.Value;
+
+      console.log("M-Pesa payment reported successful:", {
+        checkoutRequestId,
+        amount: getItem("Amount"),
+        receiptNumber: getItem("MpesaReceiptNumber")
+      });
+
+      // IMPORTANT:
+      // Do not credit a wallet based only on this callback.
+      // First verify the transaction with Safaricom and match it
+      // to a pending deposit stored securely on the server.
+    }
+
+    return res.status(200).json({
+      ResultCode: 0,
+      ResultDesc: "Callback received."
+    });
+  } catch (error) {
+    console.error("M-Pesa callback processing error:", error.message);
+
+    return res.status(500).json({
+      success: false,
+      message: "Callback processing failed."
+    });
+  }
+});
 
 // Live-money operations stay disabled.
 app.post("/api/game/start", (req, res) => {
