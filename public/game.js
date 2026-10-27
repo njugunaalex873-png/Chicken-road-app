@@ -142,8 +142,6 @@ document.getElementById("helpButton")?.addEventListener("click", () => {
 });
 
 // Open and close the Chicken Road account menu
-const menuButton = document.getElementById("menuButton");
-const accountMenu = document.getElementById("accountMenu");
 
 menuButton?.addEventListener("click", () => {
 if (!accountMenu) return;
@@ -166,7 +164,68 @@ accountMenu.hidden = true;
 menuButton.setAttribute("aria-expanded", "false");
 }
 });
+// Open My Profile
+document.querySelector('[data-open-screen="profileScreen"]')
+  ?.addEventListener("click", async () => {
+    if (accountMenu) accountMenu.hidden = true;
+    menuButton?.setAttribute("aria-expanded", "false");
 
+    if (profileScreen) profileScreen.hidden = false;
+    if (modeSelector) modeSelector.hidden = true;
+    if (gameArea) gameArea.hidden = true;
+    if (realMoneyScreen) realMoneyScreen.hidden = true;
+
+    if (profileMessage) profileMessage.textContent = "";
+
+    try {
+      await authReady;
+
+      const user = auth.currentUser;
+
+      if (!user) {
+        if (profileName) profileName.textContent = "Not signed in";
+        if (profileEmail) profileEmail.textContent = "Not available";
+        if (profileStatus) profileStatus.textContent = "Signed out";
+
+        if (profileMessage) {
+          profileMessage.textContent =
+            "Please sign in to view your profile.";
+        }
+        return;
+      }
+
+      if (profileName) {
+        profileName.textContent = user.displayName || "Player";
+      }
+
+      if (profileEmail) {
+        profileEmail.textContent = user.email || "No email available";
+      }
+
+      if (profileStatus) {
+        profileStatus.textContent = user.emailVerified
+          ? "Email verified"
+          : "Email not verified";
+      }
+    } catch (error) {
+      if (profileMessage) {
+        profileMessage.textContent =
+          "Could not load your profile. Please try again.";
+      }
+    }
+  });
+
+// Return from My Profile
+closeProfileButton?.addEventListener("click", () => {
+  if (profileScreen) profileScreen.hidden = true;
+
+  if (selectedGameMode === "demo" ||
+      selectedGameMode === "real") {
+    if (gameArea) gameArea.hidden = false;
+  } else if (modeSelector) {
+    modeSelector.hidden = false;
+  }
+});
 document.getElementById("closeDialog")?.addEventListener("click", () => {
   if (dialog) dialog.close();
 });
