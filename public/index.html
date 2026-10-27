@@ -376,31 +376,41 @@
 <!-- DEPOSIT SCREEN -->
 <section id="depositScreen" class="account-screen" hidden>
   <div class="account-card">
-    <h2>💳 Deposit</h2>
+    <h2>💳 Deposit with M-Pesa</h2><p>
+  M-Pesa sandbox testing only.
+  No real-money wallet crediting is enabled.
+</p>
 
-    <p>
-      Real-money deposits are not available yet.
-      No payment will be collected.
-    </p>
+<label for="depositAmount">Test amount (KES)</label>
+<input
+  id="depositAmount"
+  type="number"
+  min="1"
+  max="10000"
+  step="1"
+  placeholder="Enter test amount"
+>
 
-    <label for="depositAmount">Demo amount</label>
-    <input
-      id="depositAmount"
-      type="number"
-      min="1"
-      step="1"
-      placeholder="Enter an amount"
-    >
+<label for="mpesaPhone">M-Pesa phone number</label>
+<input
+  id="mpesaPhone"
+  type="tel"
+  inputmode="numeric"
+  autocomplete="tel"
+  maxlength="12"
+  placeholder="254712345678"
+>
 
-    <button type="button" id="demoDepositButton">
-      Add Demo Funds
-    </button>
+<button type="button" id="demoDepositButton">
+  Request Sandbox STK Push
+</button>
 
-    <p id="depositMessage" role="status" aria-live="polite"></p>
+<p id="depositMessage" role="status" aria-live="polite"></p>
 
-    <button type="button" class="account-back-button">
-      ← Back to Wallet
-    </button>
+<button type="button" class="account-back-button">
+  ← Back to Wallet
+</button>
+
   </div>
 </section>
 
