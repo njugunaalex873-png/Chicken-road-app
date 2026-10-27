@@ -461,10 +461,6 @@ function initializeGame() {
       "Choose Demo Mode or Real Money Mode to continue.";
   }
 }
-
-initializeGame();
-  
-
 /* Chicken Road mode selection */
 let selectedGameMode = null;
 
@@ -556,3 +552,5 @@ realModeButton?.addEventListener("click", () => {
 });
 
 selectGameMode(null);
+
+initializeGame();
