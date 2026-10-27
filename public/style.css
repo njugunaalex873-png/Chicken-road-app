@@ -861,3 +861,86 @@ background: rgba(0, 0, 0, 0.55);
 z-index: -1;
 pointer-events: none;
 }
+/* Chicken Road account screens */
+.account-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 3000;
+  overflow-y: auto;
+  box-sizing: border-box;
+  padding: 24px 16px;
+  color: #f8fafc;
+  background: linear-gradient(160deg, #11152b, #202943);
+}
+
+.account-screen[hidden] {
+  display: none !important;
+}
+
+.account-card {
+  max-width: 420px;
+  margin: 25px auto;
+  padding: 22px 18px;
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 20px;
+  background: #1b243b;
+  box-shadow: 0 12px 30px rgba(0,0,0,.3);
+}
+
+.account-card h2 {
+  text-align: center;
+}
+
+.account-card input {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 13px;
+  margin: 10px 0 16px;
+  border: 1px solid #46536d;
+  border-radius: 10px;
+  background: #101629;
+  color: #fff;
+  font-size: 16px;
+}
+
+.account-card button {
+  display: block;
+  width: 100%;
+  min-height: 48px;
+  margin-top: 12px;
+  padding: 12px;
+  border: 0;
+  border-radius: 10px;
+  background: #176b46;
+  color: white;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.account-card button:disabled {
+  background: #51596a;
+  opacity: .8;
+}
+
+.wallet-balance {
+  padding: 22px 12px;
+  margin: 18px 0;
+  text-align: center;
+  border-radius: 14px;
+  background: #101629;
+}
+
+.wallet-balance h1 {
+  margin: 10px 0;
+  color: #4ade80;
+}
+
+.wallet-balance small {
+  color: #aebbd0;
+}
+
+#transactionList {
+  margin-top: 18px;
+  overflow-wrap: anywhere;
+}
