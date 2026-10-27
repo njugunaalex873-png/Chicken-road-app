@@ -758,4 +758,93 @@ border-right-width: 2px;
   color: #bdc8d8;
   font-size: 14px;
 }
+/* ==================================
+CHICKEN ROAD — REALISTIC SIDE MENU
+================================== */
 
+.menu-container {
+position: relative;
+z-index: 1000;
+}
+
+#accountMenu.account-menu {
+position: fixed;
+top: 0;
+right: 0;
+width: 50%;
+width: min(50%, 340px);
+height: 100vh;
+height: 100dvh;
+box-sizing: border-box;
+padding: 90px 14px 24px;
+display: flex;
+flex-direction: column;
+gap: 12px;
+overflow-y: auto;
+
+background: linear-gradient(180deg, #202943 0%, #101629 100%);
+border-left: 1px solid rgba(255, 255, 255, 0.14);
+border-radius: 20px 0 0 20px;
+box-shadow: -12px 0 35px rgba(0, 0, 0, 0.45);
+
+z-index: 9999;
+animation: chickenMenuSlideIn 0.25s ease-out;
+}
+
+/* Keep the browser's hidden attribute working */
+#accountMenu.account-menu[hidden] {
+display: none !important;
+}
+
+#accountMenu.account-menu button {
+width: 100%;
+min-height: 54px;
+box-sizing: border-box;
+display: flex;
+align-items: center;
+gap: 12px;
+padding: 12px 14px;
+
+color: #f8fafc;
+background: linear-gradient(180deg, #303c58, #222c43);
+border: 1px solid rgba(255, 255, 255, 0.12);
+border-radius: 13px;
+
+font-size: 14px;
+font-weight: 600;
+text-align: left;
+cursor: pointer;
+box-shadow: 0 4px 0 #121a2a, 0 6px 12px rgba(0, 0, 0, 0.18);
+transition: transform 0.15s ease, background 0.15s ease;
+}
+
+#accountMenu.account-menu button:active {
+transform: translateY(3px);
+background: linear-gradient(180deg, #176b46, #104c34);
+box-shadow: 0 1px 0 #121a2a;
+}
+
+#accountMenu.account-menu button:focus-visible {
+outline: 2px solid #f4c542;
+outline-offset: 2px;
+}
+
+@keyframes chickenMenuSlideIn {
+from {
+transform: translateX(100%);
+opacity: 0.7;
+}
+to {
+transform: translateX(0);
+opacity: 1;
+}
+}
+
+/* Smaller phones */
+@media (max-width: 360px) {
+#accountMenu.account-menu {
+width: 75%;
+padding-left: 10px;
+padding-right: 10px;
+}
+}
