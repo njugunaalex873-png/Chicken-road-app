@@ -349,51 +349,73 @@ if (goButton) goButton.disabled = false;
     
 
 async function advanceServerRound() {
-  if (!demoRunning || roundRequestInProgress) return;
+if (!demoRunning || roundRequestInProgress) return;
 
-  roundRequestInProgress = true;
+roundRequestInProgress = true;
 
-  try {
-    const response = await fetch(`${SERVER_URL}/api/round/advance`, {
-      method: "POST"
-    });
+try {
+await authReady;
 
-    const data = await response.json();
+const user = auth.currentUser;
+if (!user) {
+  throw new Error("Please sign in again.");
+}
 
-    if (!response.ok) {
-      throw new Error(data.error || "Could not update the round.");
-    }
+const idToken = await user.getIdToken();
 
-    if (data.round) {
-      moveChickenForward(data.round.multiplier);
-    }
+const response = await fetch(`${SERVER_URL}/api/round/advance`, {
+  method: "POST",
+  headers: {
+    "Authorization": `Bearer ${idToken}`,
+    "Content-Type": "application/json"
+  },
+  body: JSON.stringify({
+    roundId: serverRoundId
+  })
+});
 
-    if (data.crashed) {
-      demoRunning = false;
-      clearInterval(roundTimer);
-      roundTimer = null;
+const data = await response.json();
 
-      if (cashoutButton) cashoutButton.disabled = true;
-      if (goButton) goButton.disabled = false;
-      if (statusText) statusText.textContent = "CRASHED";
+if (!response.ok) {
+  throw new Error(data.error || "Could not update the round.");
+}
 
-      if (message) {
-        message.textContent =
-          `Round crashed at ${formatMultiplier(data.round.crashPoint)}.`;
-      }
-    }
-  } catch (error) {
-    if (message) message.textContent = error.message;
-    clearInterval(roundTimer);
-    roundTimer = null;
-    demoRunning = false;
-    if (cashoutButton) cashoutButton.disabled = true;
-    if (goButton) goButton.disabled = false;
-    if (statusText) statusText.textContent = "CONNECTION ERROR";
-  } finally {
-    roundRequestInProgress = false;
+if (data.round) {
+  moveChickenForward(data.round.multiplier);
+}
+
+if (data.crashed) {
+  demoRunning = false;
+  clearInterval(roundTimer);
+  roundTimer = null;
+
+  if (cashoutButton) cashoutButton.disabled = true;
+  if (goButton) goButton.disabled = false;
+  if (statusText) statusText.textContent = "CRASHED";
+
+  if (message) {
+    message.textContent =
+      `Round crashed at ${formatMultiplier(data.round.crashPoint)}.`;
   }
-  }
+}
+
+} catch (error) {
+clearInterval(roundTimer);
+roundTimer = null;
+demoRunning = false;
+
+if (cashoutButton) cashoutButton.disabled = true;
+if (goButton) goButton.disabled = false;
+if (statusText) statusText.textContent = "CONNECTION ERROR";
+
+if (message) {
+  message.textContent = error.message || "Could not update the round.";
+}
+
+} finally {
+roundRequestInProgress = false;
+}
+}
 
 
 // --------------------------------------------
@@ -402,38 +424,57 @@ async function advanceServerRound() {
 
 
 async function stopDemo() {
-  if (!demoRunning || roundRequestInProgress) return;
+if (!demoRunning || roundRequestInProgress) return;
 
-  roundRequestInProgress = true;
+roundRequestInProgress = true;
 
-  try {
-    const response = await fetch(`${SERVER_URL}/api/round/cashout`, {
-      method: "POST"
-    });
+try {
+await authReady;
 
-    const data = await response.json();
+const user = auth.currentUser;
+if (!user) {
+  throw new Error("Please sign in again.");
+}
 
-    if (!response.ok) {
-      throw new Error(data.error || "Could not cash out of the demo round.");
-    }
+const idToken = await user.getIdToken();
 
-    demoRunning = false;
-    clearInterval(roundTimer);
-    roundTimer = null;
+const response = await fetch(`${SERVER_URL}/api/round/cashout`, {
+  method: "POST",
+  headers: {
+    "Authorization": `Bearer ${idToken}`,
+    "Content-Type": "application/json"
+  },
+  body: JSON.stringify({
+    roundId: serverRoundId
+  })
+});
 
-    if (cashoutButton) cashoutButton.disabled = true;
-    if (goButton) goButton.disabled = false;
-    if (statusText) statusText.textContent = "DEMO STOPPED";
+const data = await response.json();
 
-    if (message) {
-      message.textContent =
-        `Demo stopped at ${formatMultiplier(multiplier)}. No real money was involved.`;
-    }
-  } catch (error) {
-    if (message) message.textContent = error.message;
-  } finally {
-    roundRequestInProgress = false;
-  }
+if (!response.ok) {
+  throw new Error(data.error || "Could not cash out of the demo round.");
+}
+
+demoRunning = false;
+clearInterval(roundTimer);
+roundTimer = null;
+
+if (cashoutButton) cashoutButton.disabled = true;
+if (goButton) goButton.disabled = false;
+if (statusText) statusText.textContent = "DEMO STOPPED";
+
+if (message) {
+  message.textContent =
+    `Demo stopped at ${formatMultiplier(multiplier)}. No real money was involved.`;
+}
+
+} catch (error) {
+if (message) {
+message.textContent = error.message || "Could not cash out.";
+}
+} finally {
+roundRequestInProgress = false;
+}
 }
 
 
