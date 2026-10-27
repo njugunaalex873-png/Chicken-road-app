@@ -539,3 +539,20 @@ function selectGameMode(mode) {
     if (stakeInput) stakeInput.disabled = true;
   }
 }
+demoModeButton?.addEventListener("click", () => {
+  selectGameMode("demo");
+});
+
+realModeButton?.addEventListener("click", () => {
+  if (demoRunning) {
+    if (modeMessage) {
+      modeMessage.textContent =
+        "Finish your current demo round first.";
+    }
+    return;
+  }
+
+  selectGameMode("real");
+});
+
+selectGameMode(null);
