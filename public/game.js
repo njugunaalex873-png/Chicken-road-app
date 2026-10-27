@@ -21,7 +21,14 @@ const dialogText = document.getElementById("dialogText");
 const modeSelector = document.getElementById("modeSelector");
 const gameArea = document.getElementById("gameArea");
 const backToModesButton = document.getElementById("backToModesButton");
+const realMoneyScreen =
+  document.getElementById("realMoneyScreen");
 
+const realMoneyMessage =
+  document.getElementById("realMoneyMessage");
+
+const backToModesFromRealButton =
+  document.getElementById("backToModesFromRealButton");
 let step = 0;
 let multiplier = 1.00;
 let demoRunning = false;
