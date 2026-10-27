@@ -1,3 +1,4 @@
+import { auth, authReady } from "./firebase.js";
 // ============================================
 // CHICKEN ROAD — PLAYER-CONTROLLED VISUAL DEMO
 // Demo only: no real wagers or payouts.
