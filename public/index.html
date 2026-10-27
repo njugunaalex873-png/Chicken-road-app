@@ -87,6 +87,20 @@
 </section>
     
 <div id="gameArea" hidden>
+  <section id="realMoneyScreen" class="mode-selector" hidden>
+  <h2>💳 Real Money Mode</h2>  <p>Welcome to the Real Money section.</p>  <div class="balance">
+    <p>Account balance</p>
+    <h3 id="realBalance">Not connected</h3>
+  </div>  <p id="realMoneyMessage" role="status" aria-live="polite">
+    Real-money services are not available yet.
+  </p>  <button id="realDepositButton" type="button" disabled>
+    Deposit — Unavailable
+  </button>  <button id="realWithdrawButton" type="button" disabled>
+    Withdraw — Unavailable
+  </button>  <button id="backToModesFromRealButton" type="button">
+    ⬅ Back to Game Modes
+  </button>
+  </section>
   <button id="backToModesButton" type="button">
   ⬅ Back to Game Modes
   </button>
