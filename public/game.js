@@ -19,6 +19,7 @@ const dialogTitle = document.getElementById("dialogTitle");
 const dialogText = document.getElementById("dialogText");
 const modeSelector = document.getElementById("modeSelector");
 const gameArea = document.getElementById("gameArea");
+const backToModesButton = document.getElementById("backToModesButton");
 
 let step = 0;
 let multiplier = 1.00;
@@ -541,7 +542,24 @@ function selectGameMode(mode) {
 demoModeButton?.addEventListener("click", () => {
   selectGameMode("demo");
 });
+backToModesButton?.addEventListener("click", () => {
+if (demoRunning) {
+if (message) {
+message.textContent =
+"Finish your current demo round before leaving.";
+}
+return;
+}
 
+if (gameArea) gameArea.hidden = true;
+if (modeSelector) modeSelector.hidden = false;
+
+selectGameMode(null);
+
+if (statusText) statusText.textContent = "CHOOSE GAME MODE";
+if (payout) payout.textContent = "Choose a mode first";
+if (message) message.textContent = "Choose a game mode to continue.";
+});
 realModeButton?.addEventListener("click", () => {
   if (demoRunning) {
     if (modeMessage) {
