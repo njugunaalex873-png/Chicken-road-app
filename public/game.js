@@ -418,7 +418,26 @@ const response = await fetch(`${SERVER_URL}/api/round/start`, {
   }
 });
 
-const data = await response.json();
+
+const responseText = await response.text();
+
+let data;
+
+try {
+  data = JSON.parse(responseText);
+} catch {
+  console.error("Deposit response was not JSON:", {
+    status: response.status,
+    url: response.url,
+    contentType: response.headers.get("content-type"),
+    responsePreview: responseText.slice(0, 250)
+  });
+
+  throw new Error(
+    `Server returned a non-JSON response (HTTP ${response.status}). Check the browser console.`
+  );
+}
+  
 
 if (!response.ok) {
   throw new Error(data.error || "Could not start the demo round.");
