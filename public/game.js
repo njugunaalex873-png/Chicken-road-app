@@ -35,6 +35,16 @@ let demoRunning = false;
 
 const SERVER_URL = "https://chicken-road-server.onrender.com";
 let serverRoundId = null;
+// My Profile screen elements
+const menuButton = document.getElementById("menuButton");
+const accountMenu = document.getElementById("accountMenu");
+
+const profileScreen = document.getElementById("profileScreen");
+const profileName = document.getElementById("profileName");
+const profileEmail = document.getElementById("profileEmail");
+const profileStatus = document.getElementById("profileStatus");
+const profileMessage = document.getElementById("profileMessage");
+const closeProfileButton = document.getElementById("closeProfileButton");
 let roundTimer = null;
 let roundRequestInProgress = false;
 const ROUND_UPDATE_INTERVAL = 1000;
