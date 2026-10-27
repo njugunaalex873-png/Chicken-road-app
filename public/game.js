@@ -623,8 +623,9 @@ if (statusText) statusText.textContent = "CHOOSE GAME MODE";
 if (payout) payout.textContent = "Choose a mode first";
 if (message) message.textContent = "Choose a game mode to continue.";
 });
+// Open the separate Real Money Mode screen.
 realModeButton?.addEventListener("click", () => {
-  if (demoRunning) {
+  if (demoRunning || roundRequestInProgress) {
     if (modeMessage) {
       modeMessage.textContent =
         "Finish your current demo round first.";
@@ -632,7 +633,30 @@ realModeButton?.addEventListener("click", () => {
     return;
   }
 
-  selectGameMode("real");
+  if (modeSelector) modeSelector.hidden = true;
+  if (gameArea) gameArea.hidden = true;
+
+  if (realMoneyScreen) {
+    realMoneyScreen.hidden = false;
+  }
+
+  if (realMoneyMessage) {
+    realMoneyMessage.textContent =
+      "Real-money betting, deposits and withdrawals are not enabled.";
+  }
+});
+
+// Return to the game mode selection screen.
+backToModesFromRealButton?.addEventListener("click", () => {
+  if (realMoneyScreen) {
+    realMoneyScreen.hidden = true;
+  }
+
+  if (modeSelector) {
+    modeSelector.hidden = false;
+  }
+
+  selectGameMode(null);
 });
 
 selectGameMode(null);
