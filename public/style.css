@@ -848,3 +848,16 @@ padding-left: 10px;
 padding-right: 10px;
 }
 }
+/* Dark overlay behind the side menu */
+#accountMenu.account-menu:not([hidden])::before {
+content: "";
+position: fixed;
+top: 0;
+right: 100%;
+width: 100vw;
+height: 100vh;
+height: 100dvh;
+background: rgba(0, 0, 0, 0.55);
+z-index: -1;
+pointer-events: none;
+}
