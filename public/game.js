@@ -131,11 +131,30 @@ document.getElementById("helpButton")?.addEventListener("click", () => {
   );
 });
 
-document.getElementById("menuButton")?.addEventListener("click", () => {
-  showDialog(
-    "Chicken Road menu",
-    "Account registration, wallet history, and settings are not connected yet."
-  );
+// Open and close the Chicken Road account menu
+const menuButton = document.getElementById("menuButton");
+const accountMenu = document.getElementById("accountMenu");
+
+menuButton?.addEventListener("click", () => {
+if (!accountMenu) return;
+
+const isOpening = accountMenu.hidden;
+accountMenu.hidden = !isOpening;
+
+menuButton.setAttribute("aria-expanded", String(isOpening));
+});
+
+// Close the menu when the player taps outside it
+document.addEventListener("click", (event) => {
+if (
+accountMenu &&
+menuButton &&
+!accountMenu.contains(event.target) &&
+!menuButton.contains(event.target)
+) {
+accountMenu.hidden = true;
+menuButton.setAttribute("aria-expanded", "false");
+}
 });
 
 document.getElementById("closeDialog")?.addEventListener("click", () => {
