@@ -117,15 +117,31 @@ $("logoutButton")?.addEventListener("click", async () => {
 });
 
 onAuthStateChanged(auth, async user => {
-  await authReady;
+await authReady;
 
-  if ($("authScreen")) $("authScreen").hidden = !!user;
-  if ($("gameScreen")) $("gameScreen").hidden = !user;
+if ($("authScreen")) $("authScreen").hidden = !!user;
+if ($("gameScreen")) $("gameScreen").hidden = !user;
 
-  if (user && $("signedInName")) {
-    $("signedInName").textContent =
-      user.displayName || user.email || "Player";
-  }
+if (user && $("signedInName")) {
+$("signedInName").textContent =
+user.displayName || user.email || "Player";
+}
 
-  if (!user) showForm("login");
+if (user) {
+// After login or registration, show the mode selector.
+if ($("modeSelector")) $("modeSelector").hidden = false;
+
+// Keep the actual game hidden until a mode is chosen.
+if ($("gameArea")) $("gameArea").hidden = true;
+
+if ($("realMoneyScreen")) $("realMoneyScreen").hidden = true;
+
+} else {
+showForm("login");
+
+if ($("modeSelector")) $("modeSelector").hidden = true;
+if ($("gameArea")) $("gameArea").hidden = true;
+if ($("realMoneyScreen")) $("realMoneyScreen").hidden = true;
+
+}
 });
