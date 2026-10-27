@@ -113,20 +113,6 @@
   </button>
 </section>   
 <div id="gameArea" hidden>
-  <section id="realMoneyScreen" class="mode-selector" hidden>
-  <h2>💳 Real Money Mode</h2>  <p>Welcome to the Real Money section.</p>  <div class="balance">
-    <p>Account balance</p>
-    <h3 id="realBalance">Not connected</h3>
-  </div>  <p id="realMoneyMessage" role="status" aria-live="polite">
-    Real-money services are not available yet.
-  </p>  <button id="realDepositButton" type="button" disabled>
-    Deposit — Unavailable
-  </button>  <button id="realWithdrawButton" type="button" disabled>
-    Withdraw — Unavailable
-  </button>  <button id="backToModesFromRealButton" type="button">
-    ⬅ Back to Game Modes
-  </button>
-  </section>
   <button id="backToModesButton" type="button">
   ⬅ Back to Game Modes
   </button>
@@ -137,7 +123,43 @@
     <span id="balance">Account not connected</span>
     <span class="coin">●</span>
   </div>
-  <button class="icon-button" id="menuButton" aria-label="Menu">☰</button>
+  <div class="menu-container">
+  <button
+    class="icon-button"
+    id="menuButton"
+    type="button"
+    aria-label="Menu"
+    aria-expanded="false"
+  >
+    ☰
+  </button>
+
+  <nav id="accountMenu" class="account-menu" hidden>
+    <button type="button" data-open-screen="profileScreen">
+      👤 My Profile
+    </button>
+
+    <button type="button" data-open-screen="walletScreen">
+      💰 Wallet
+    </button>
+
+    <button type="button" data-open-screen="depositScreen">
+      💳 Deposit
+    </button>
+
+    <button type="button" data-open-screen="withdrawScreen">
+      🏧 Withdraw
+    </button>
+
+    <button type="button" data-open-screen="historyScreen">
+      📜 Transaction History
+    </button>
+
+    <button type="button" data-open-screen="settingsScreen">
+      ⚙️ Settings
+    </button>
+  </nav>
+  </div>
 </div>
 
   </header>  <main>
