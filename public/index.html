@@ -343,6 +343,114 @@
 
   </div>
     </section>
+    <!-- WALLET SCREEN -->
+<section id="walletScreen" class="account-screen" hidden>
+  <div class="account-card">
+    <h2>💰 My Wallet</h2>
+    <p>Manage your Chicken Road account.</p>
+
+    <div class="wallet-balance">
+      <span>Demo balance</span>
+      <h1 id="walletBalance">0.00</h1>
+      <small>Virtual funds only — no cash value</small>
+    </div>
+
+    <button type="button" data-open-screen="depositScreen">
+      💳 Deposit
+    </button>
+
+    <button type="button" data-open-screen="withdrawScreen">
+      🏧 Withdraw
+    </button>
+
+    <button type="button" id="walletHistoryButton">
+      📜 Transaction History
+    </button>
+
+    <button type="button" class="account-back-button">
+      ← Back to Game
+    </button>
+  </div>
+</section>
+
+<!-- DEPOSIT SCREEN -->
+<section id="depositScreen" class="account-screen" hidden>
+  <div class="account-card">
+    <h2>💳 Deposit</h2>
+
+    <p>
+      Real-money deposits are not available yet.
+      No payment will be collected.
+    </p>
+
+    <label for="depositAmount">Demo amount</label>
+    <input
+      id="depositAmount"
+      type="number"
+      min="1"
+      step="1"
+      placeholder="Enter an amount"
+    >
+
+    <button type="button" id="demoDepositButton">
+      Add Demo Funds
+    </button>
+
+    <p id="depositMessage" role="status" aria-live="polite"></p>
+
+    <button type="button" class="account-back-button">
+      ← Back to Wallet
+    </button>
+  </div>
+</section>
+
+<!-- WITHDRAW SCREEN -->
+<section id="withdrawScreen" class="account-screen" hidden>
+  <div class="account-card">
+    <h2>🏧 Withdraw</h2>
+
+    <p>
+      Cash withdrawals are currently unavailable.
+      Demo funds cannot be converted to money.
+    </p>
+
+    <label for="withdrawAmount">Demo amount</label>
+    <input
+      id="withdrawAmount"
+      type="number"
+      min="1"
+      step="1"
+      placeholder="Enter an amount"
+    >
+
+    <button type="button" disabled>
+      Real Withdrawal Unavailable
+    </button>
+
+    <p id="withdrawMessage" role="status" aria-live="polite"></p>
+
+    <button type="button" class="account-back-button">
+      ← Back to Wallet
+    </button>
+  </div>
+</section>
+
+<!-- TRANSACTION HISTORY SCREEN -->
+<section id="historyScreen" class="account-screen" hidden>
+  <div class="account-card">
+    <h2>📜 Transaction History</h2>
+
+    <p>Demo transactions only.</p>
+
+    <div id="transactionList">
+      <p>No demo transactions yet.</p>
+    </div>
+
+    <button type="button" class="account-back-button">
+      ← Back to Wallet
+    </button>
+  </div>
+</section>
 <dialog id="infoDialog">
     <div class="dialog-content">
       <button id="closeDialog" class="close-button">✕</button>
