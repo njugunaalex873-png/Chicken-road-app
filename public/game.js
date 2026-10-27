@@ -623,7 +623,7 @@ if (statusText) statusText.textContent = "CHOOSE GAME MODE";
 if (payout) payout.textContent = "Choose a mode first";
 if (message) message.textContent = "Choose a game mode to continue.";
 });
-// Open the separate Real Money Mode screen.
+// Open Chicken Road board in Real Money Mode.
 realModeButton?.addEventListener("click", () => {
   if (demoRunning || roundRequestInProgress) {
     if (modeMessage) {
@@ -633,17 +633,38 @@ realModeButton?.addEventListener("click", () => {
     return;
   }
 
+  // Hide the mode selection and separate placeholder screen.
   if (modeSelector) modeSelector.hidden = true;
-  if (gameArea) gameArea.hidden = true;
+  if (realMoneyScreen) realMoneyScreen.hidden = true;
 
-  if (realMoneyScreen) {
-    realMoneyScreen.hidden = false;
-  }
+  // Show the existing Chicken Road game board.
+  if (gameArea) gameArea.hidden = false;
+
+  // Mark the selected mode.
+  selectedGameMode = "real";
 
   if (realMoneyMessage) {
     realMoneyMessage.textContent =
-      "Real-money betting, deposits and withdrawals are not enabled.";
+      "Real Money Mode preview. Real-money betting, deposits and withdrawals are disabled.";
   }
+
+  if (statusText) {
+    statusText.textContent = "REAL MONEY MODE PREVIEW";
+  }
+
+  if (balance) {
+    balance.textContent = "Real wallet not connected";
+  }
+
+  if (message) {
+    message.textContent =
+      "Game board preview only. Real-money play is unavailable.";
+  }
+
+  // Keep real-money gameplay controls disabled.
+  if (goButton) goButton.disabled = true;
+  if (cashoutButton) cashoutButton.disabled = true;
+  if (stakeInput) stakeInput.disabled = true;
 });
 
 // Return to the game mode selection screen.
