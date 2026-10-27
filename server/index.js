@@ -361,12 +361,110 @@ message: "Real-money game services are not enabled."
 });
 });
 
-app.post("/api/wallet/deposit", (req, res) => {
-res.status(503).json({
-success: false,
-realMoneyEnabled: false,
-message: "Payment integration is not configured."
+app.post("/api/wallet/deposit", requireLogin, async (req, res) => {
+try {
+const { phone, amount } = req.body || {};
+
+// Sandbox testing limits only.
+if (
+  typeof phone !== "string" ||
+  !/^254[17]\d{8}$/.test(phone) ||
+  !Number.isSafeInteger(amount) ||
+  amount < 1 ||
+  amount > 10000
+) {
+  return res.status(400).json({
+    success: false,
+    message: "Enter a valid Kenyan phone number (2547XXXXXXXX or 2541XXXXXXXX) and a whole-number test amount between 1 and 10,000."
+  });
+}
+
+const shortcode = process.env.MPESA_SHORTCODE;
+const passkey = process.env.MPESA_PASSKEY;
+const callbackUrl = process.env.MPESA_CALLBACK_URL;
+
+if (!shortcode || !passkey || !callbackUrl) {
+  return res.status(503).json({
+    success: false,
+    message: "M-Pesa sandbox configuration is incomplete."
+  });
+}
+
+const parsedCallback = new URL(callbackUrl);
+
+if (
+  parsedCallback.protocol !== "https:" ||
+  parsedCallback.hostname !== "chicken-road-server.onrender.com" ||
+  parsedCallback.pathname !== "/api/mpesa/callback"
+) {
+  return res.status(503).json({
+    success: false,
+    message: "The configured callback URL is invalid."
+  });
+}
+
+const accessToken = await getMpesaAccessToken();
+const timestamp = getMpesaTimestamp();
+
+const password = Buffer.from(
+  `${shortcode}${passkey}${timestamp}`
+).toString("base64");
+
+const response = await axios.post(
+  "https://sandbox.safaricom.co.ke/mpesa/stkpush/v1/processrequest",
+  {
+    BusinessShortCode: shortcode,
+    Password: password,
+    Timestamp: timestamp,
+    TransactionType: "CustomerPayBillOnline",
+    Amount: amount,
+    PartyA: phone,
+    PartyB: shortcode,
+    PhoneNumber: phone,
+    CallBackURL: callbackUrl,
+    AccountReference: `CR${req.user.uid.slice(0, 8)}`,
+    TransactionDesc: "Chicken Road sandbox deposit"
+  },
+  {
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      "Content-Type": "application/json"
+    },
+    timeout: 20000
+  }
+);
+
+console.log("M-Pesa sandbox STK request submitted:", {
+  uid: req.user.uid,
+  amount,
+  responseCode: response.data.ResponseCode
 });
+
+return res.json({
+  success: true,
+  sandbox: true,
+  message: response.data.ResponseDescription ||
+    "Sandbox request submitted.",
+  customerMessage: response.data.CustomerMessage || "",
+  checkoutRequestId: response.data.CheckoutRequestID || null,
+  merchantRequestId: response.data.MerchantRequestID || null,
+  walletCredited: false
+});
+
+} catch (error) {
+console.error("M-Pesa sandbox request failed:", {
+status: error.response?.status,
+message: error.response?.data?.errorMessage ||
+error.response?.data?.ResponseDescription ||
+error.message
+});
+
+return res.status(502).json({
+  success: false,
+  message: "The M-Pesa sandbox request failed. Check the Render logs and Daraja sandbox configuration."
+});
+
+}
 });
 
 app.post("/api/wallet/withdraw", (req, res) => {
