@@ -432,9 +432,12 @@ cashoutButton?.addEventListener("click", stopDemo);
 // --------------------------------------------
 
 function initializeGame() {
+
+function initializeGame() {
   if (!roadGrid || !chicken) {
     if (message) {
-      message.textContent = "Could not find the road or chicken element.";
+      message.textContent =
+        "Could not find the road or chicken element.";
     }
     return;
   }
@@ -448,16 +451,20 @@ function initializeGame() {
 
   if (cashoutButton) cashoutButton.disabled = true;
   if (goButton) goButton.textContent = "GO";
-  if (statusText) statusText.textContent = "READY — DEMO MODE";
-  if (payout) payout.textContent = "Demo only";
+  if (goButton) goButton.disabled = true;
+  if (stakeInput) stakeInput.disabled = true;
+
+  if (statusText) statusText.textContent = "CHOOSE GAME MODE";
+  if (payout) payout.textContent = "Choose a mode first";
 
   if (message) {
     message.textContent =
-      "Chicken starts at 1.00×. Press GO to start, then GO again to advance.";
+      "Choose Demo Mode or Real Money Mode to continue.";
   }
 }
 
 initializeGame();
+  
 
 /* Chicken Road mode selection */
 let selectedGameMode = null;
