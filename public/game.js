@@ -871,48 +871,85 @@ walletHistoryButton?.addEventListener("click", () => {
   openAccountScreen(historyScreen);
 });
 
-// Add demo funds only — not real money
-document.getElementById("demoDepositButton")
-  ?.addEventListener("click", () => {
-    const amountInput = document.getElementById("depositAmount");
-    const depositMessage = document.getElementById("depositMessage");
+const depositButton = document.getElementById("demoDepositButton");
 
-    const amount = Number(amountInput?.value);
+depositButton?.addEventListener("click", async () => {
+  const amountInput = document.getElementById("depositAmount");
+  const phoneInput = document.getElementById("mpesaPhone");
+  const depositMessage = document.getElementById("depositMessage");
 
-    if (!Number.isFinite(amount) || amount <= 0) {
-      if (depositMessage) {
-        depositMessage.textContent = "Enter a valid demo amount.";
-      }
-      return;
+  const amount = Number(amountInput?.value);
+  const phone = phoneInput?.value.trim();
+
+  if (!Number.isSafeInteger(amount) || amount < 1 || amount > 10000) {
+    if (depositMessage) {
+      depositMessage.textContent =
+        "Enter a whole-number sandbox test amount between 1 and 10,000.";
+    }
+    return;
+  }
+
+  if (!/^254[17]\d{8}$/.test(phone || "")) {
+    if (depositMessage) {
+      depositMessage.textContent =
+        "Enter a valid Kenyan number, for example 254712345678.";
+    }
+    return;
+  }
+
+  depositButton.disabled = true;
+
+  if (depositMessage) {
+    depositMessage.textContent = "Submitting sandbox payment request...";
+  }
+
+  try {
+    await authReady;
+
+    const user = auth.currentUser;
+
+    if (!user) {
+      throw new Error("Please sign in before requesting a payment.");
     }
 
-    if (amount > 100000) {
-      if (depositMessage) {
-        depositMessage.textContent =
-          "The demo amount cannot exceed 100,000.";
+    const idToken = await user.getIdToken();
+
+    const response = await fetch(
+      `${SERVER_URL}/api/wallet/deposit`,
+      {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${idToken}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ phone, amount })
       }
-      return;
+    );
+
+    const data = await response.json();
+
+    if (!response.ok || !data.success) {
+      throw new Error(data.message || "The payment request failed.");
     }
-
-    demoWalletBalance += amount;
-
-    demoTransactions.unshift({
-      type: "Demo funds added",
-      amount,
-      date: new Date().toLocaleString()
-    });
-
-    updateWalletDisplay();
-    renderDemoTransactions();
 
     if (depositMessage) {
       depositMessage.textContent =
-        `${amount.toFixed(2)} demo funds added. No money was collected.`;
+        data.customerMessage ||
+        data.message ||
+        "Sandbox request submitted. Follow the test instructions provided by Daraja.";
     }
 
-    if (amountInput) amountInput.value = "";
-  });
-
+    // Do not credit the wallet until payment is verified
+    // and securely recorded by the server.
+  } catch (error) {
+    if (depositMessage) {
+      depositMessage.textContent =
+        error.message || "Could not submit the sandbox request.";
+    }
+  } finally {
+    depositButton.disabled = false;
+  }
+});
 // Render demo-only transaction history
 function renderDemoTransactions() {
   if (!transactionList) return;
