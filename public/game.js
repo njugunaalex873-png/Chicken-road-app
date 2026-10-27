@@ -286,53 +286,67 @@ function resetDemoRoad() {
 // Start or advance
 // --------------------------------------------
 
-
 async function startDemo() {
-  if (selectedGameMode !== "demo") return;
-  if (demoRunning || roundRequestInProgress) return;
+if (selectedGameMode !== "demo") return;
+if (demoRunning || roundRequestInProgress) return;
 
-  const stake = Number(stakeInput?.value);
+const stake = Number(stakeInput?.value);
 
-  if (!Number.isFinite(stake) || stake < 1) {
-    if (message) message.textContent = "Enter a valid demo stake amount.";
-    return;
-  }
-
-  if (!resetDemoRoad()) {
-    if (message) message.textContent = "Could not find the road or chicken.";
-    return;
-  }
-
-  roundRequestInProgress = true;
-  if (goButton) goButton.disabled = true;
-
-  try {
-    const response = await fetch(`${SERVER_URL}/api/round/start`, {
-      method: "POST"
-    });
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      throw new Error(data.error || "Could not start the demo round.");
-    }
-
-    serverRoundId = data.round.id;
-    multiplier = data.round.multiplier;
-    demoRunning = true;
-
-    if (cashoutButton) cashoutButton.disabled = false;
-    if (statusText) statusText.textContent = "DEMO RUNNING";
-    if (message) message.textContent = "Demo round started at 1.00×.";
-
-    roundTimer = setInterval(advanceServerRound, ROUND_UPDATE_INTERVAL);
-  } catch (error) {
-    if (message) message.textContent = error.message;
-  } finally {
-    roundRequestInProgress = false;
-    if (goButton) goButton.disabled = false;
-  }
+if (!Number.isFinite(stake) || stake < 1) {
+if (message) message.textContent = "Enter a valid demo stake amount.";
+return;
 }
+
+if (!resetDemoRoad()) {
+if (message) message.textContent = "Could not find the road or chicken.";
+return;
+}
+
+roundRequestInProgress = true;
+if (goButton) goButton.disabled = true;
+
+try {
+await authReady;
+
+const user = auth.currentUser;
+if (!user) {
+  throw new Error("Please sign in before starting a round.");
+}
+
+const idToken = await user.getIdToken();
+
+const response = await fetch(`${SERVER_URL}/api/round/start`, {
+  method: "POST",
+  headers: {
+    "Authorization": `Bearer ${idToken}`,
+    "Content-Type": "application/json"
+  }
+});
+
+const data = await response.json();
+
+if (!response.ok) {
+  throw new Error(data.error || "Could not start the demo round.");
+}
+
+serverRoundId = data.round.id;
+multiplier = data.round.multiplier;
+demoRunning = true;
+
+if (cashoutButton) cashoutButton.disabled = false;
+if (statusText) statusText.textContent = "DEMO RUNNING";
+if (message) message.textContent = "Demo round started at 1.00×.";
+
+roundTimer = setInterval(advanceServerRound, ROUND_UPDATE_INTERVAL);
+
+} catch (error) {
+if (message) message.textContent = error.message || "Could not start the demo round.";
+} finally {
+roundRequestInProgress = false;
+if (goButton) goButton.disabled = false;
+}
+}
+    
 
 async function advanceServerRound() {
   if (!demoRunning || roundRequestInProgress) return;
