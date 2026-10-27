@@ -771,3 +771,176 @@ backToModesFromRealButton?.addEventListener("click", () => {
 selectGameMode(null);
 
 initializeGame();
+// ============================================
+// WALLET AND ACCOUNT SCREEN NAVIGATION
+// Demo interface only — no real-money transactions
+// ============================================
+
+const walletScreen = document.getElementById("walletScreen");
+const depositScreen = document.getElementById("depositScreen");
+const withdrawScreen = document.getElementById("withdrawScreen");
+const historyScreen = document.getElementById("historyScreen");
+
+const walletBalance = document.getElementById("walletBalance");
+const transactionList = document.getElementById("transactionList");
+const walletHistoryButton = document.getElementById("walletHistoryButton");
+
+const accountScreens = [
+  walletScreen,
+  depositScreen,
+  withdrawScreen,
+  historyScreen
+];
+
+let demoWalletBalance = 0;
+const demoTransactions = [];
+
+function hideAccountScreens() {
+  accountScreens.forEach(screen => {
+    if (screen) screen.hidden = true;
+  });
+}
+
+function openAccountScreen(screen) {
+  if (!screen) return;
+
+  hideAccountScreens();
+
+  if (profileScreen) profileScreen.hidden = true;
+  if (modeSelector) modeSelector.hidden = true;
+  if (gameArea) gameArea.hidden = true;
+  if (realMoneyScreen) realMoneyScreen.hidden = true;
+
+  screen.hidden = false;
+
+  if (accountMenu) accountMenu.hidden = true;
+  menuButton?.setAttribute("aria-expanded", "false");
+
+  updateWalletDisplay();
+}
+
+// Connect Wallet, Deposit, Withdraw, and History menu buttons
+document.querySelectorAll("[data-open-screen]").forEach(button => {
+  button.addEventListener("click", () => {
+    const screenId = button.dataset.openScreen;
+
+    const screen = document.getElementById(screenId);
+
+    if (
+      screenId === "walletScreen" ||
+      screenId === "depositScreen" ||
+      screenId === "withdrawScreen" ||
+      screenId === "historyScreen"
+    ) {
+      openAccountScreen(screen);
+    }
+  });
+});
+
+// Display the demo balance
+function updateWalletDisplay() {
+  if (walletBalance) {
+    walletBalance.textContent = demoWalletBalance.toFixed(2);
+  }
+}
+
+// Return to the Wallet screen
+document.querySelectorAll(".account-back-button").forEach(button => {
+  button.addEventListener("click", () => {
+    const currentScreen = button.closest(".account-screen");
+
+    if (currentScreen === walletScreen) {
+      hideAccountScreens();
+
+      if (selectedGameMode === "demo" ||
+          selectedGameMode === "real") {
+        if (gameArea) gameArea.hidden = false;
+      } else if (modeSelector) {
+        modeSelector.hidden = false;
+      }
+
+      return;
+    }
+
+    openAccountScreen(walletScreen);
+  });
+});
+
+// Open transaction history from Wallet
+walletHistoryButton?.addEventListener("click", () => {
+  openAccountScreen(historyScreen);
+});
+
+// Add demo funds only — not real money
+document.getElementById("demoDepositButton")
+  ?.addEventListener("click", () => {
+    const amountInput = document.getElementById("depositAmount");
+    const depositMessage = document.getElementById("depositMessage");
+
+    const amount = Number(amountInput?.value);
+
+    if (!Number.isFinite(amount) || amount <= 0) {
+      if (depositMessage) {
+        depositMessage.textContent = "Enter a valid demo amount.";
+      }
+      return;
+    }
+
+    if (amount > 100000) {
+      if (depositMessage) {
+        depositMessage.textContent =
+          "The demo amount cannot exceed 100,000.";
+      }
+      return;
+    }
+
+    demoWalletBalance += amount;
+
+    demoTransactions.unshift({
+      type: "Demo funds added",
+      amount,
+      date: new Date().toLocaleString()
+    });
+
+    updateWalletDisplay();
+    renderDemoTransactions();
+
+    if (depositMessage) {
+      depositMessage.textContent =
+        `${amount.toFixed(2)} demo funds added. No money was collected.`;
+    }
+
+    if (amountInput) amountInput.value = "";
+  });
+
+// Render demo-only transaction history
+function renderDemoTransactions() {
+  if (!transactionList) return;
+
+  if (demoTransactions.length === 0) {
+    transactionList.innerHTML = "<p>No demo transactions yet.</p>";
+    return;
+  }
+
+  transactionList.replaceChildren();
+
+  demoTransactions.forEach(transaction => {
+    const item = document.createElement("div");
+    item.className = "demo-transaction";
+
+    const title = document.createElement("strong");
+    title.textContent = transaction.type;
+
+    const amount = document.createElement("p");
+    amount.textContent = `+${transaction.amount.toFixed(2)} demo funds`;
+
+    const date = document.createElement("small");
+    date.textContent = transaction.date;
+
+    item.append(title, amount, date);
+    transactionList.appendChild(item);
+  });
+}
+
+updateWalletDisplay();
+renderDemoTransactions();
